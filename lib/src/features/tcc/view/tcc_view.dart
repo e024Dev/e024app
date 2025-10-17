@@ -38,7 +38,7 @@ class _TccViewState extends State<TccView> {
         },
         destinations: [
           NavigationDestination(
-            icon: Icon(Icons.subject_outlined),
+            icon: Icon(Icons.school_outlined),
             label: 'Cursos',
             selectedIcon: Icon(Icons.school),
           ),

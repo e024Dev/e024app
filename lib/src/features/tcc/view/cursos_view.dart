@@ -19,7 +19,22 @@ class _CursosViewState extends State<CursosView> {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (snapshot.hasData) {
-            return Text(snapshot.data.toString());
+            var cursos = snapshot.data;
+            return ListView.builder(
+              itemCount: cursos!.length,
+              itemBuilder: (context, index) {
+                final curso = cursos[index];
+                return Card(
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      child: Text(curso['id']!.toString()),
+                    ),
+                    title: Text(curso['nome']!),
+                    subtitle: Text(curso['descricao']!),
+                  ),
+                );
+              },
+            );
           }
 
           return Center(child: CircularProgressIndicator());
