@@ -33,7 +33,7 @@ final class CursosViewModelProvider
   CursosViewModel create() => CursosViewModel();
 }
 
-String _$cursosViewModelHash() => r'd44c79d001f68daa2764aa4484ae14f4121395d4';
+String _$cursosViewModelHash() => r'9f7cff81779d07057880ae6d74012180006cee2a';
 
 abstract class _$CursosViewModel extends $AsyncNotifier<List<CursoModel>> {
   FutureOr<List<CursoModel>> build();

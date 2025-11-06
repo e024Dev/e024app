@@ -7,13 +7,13 @@ part 'curso_model.g.dart';
 abstract class CursoModel with _$CursoModel {
   @JsonSerializable(fieldRename: FieldRename.snake)
   const factory CursoModel({
-    @JsonKey(name: 'id', includeToJson: false)
-    int? id,
+    @JsonKey(name: 'id', includeToJson: false) int? id,
     String? nome,
     String? descricao,
     String? ementaResumida,
     String? urlImagem,
   }) = _CursoModel;
 
-  factory CursoModel.fromJson(Map<String, dynamic> json) => _$CursoModelFromJson(json);
+  factory CursoModel.fromJson(Map<String, dynamic> json) =>
+      _$CursoModelFromJson(json);
 }

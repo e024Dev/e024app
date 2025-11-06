@@ -413,8 +413,176 @@ Precisamos ajustar o arquivo cursos_view.dart para que possamos navegar para a t
 
 
 ```dart
+import 'package:go_router/go_router.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+import 'package:tcc_flutter_app/src/features/cursos/view/cursos_view.dart';
+import 'package:tcc_flutter_app/src/features/cursos/view/detalhe_curso_view.dart';
+
+final router = GoRouter(
+  initialLocation: '/cursos',
+  routes: [
+    GoRoute(
+      path: '/cursos',
+      builder: (context, state) => const CursosView(),
+      routes: [
+        GoRoute(
+          path: '/curso',
+          builder: (context, state) {
+            final curso = state.extra as CursoModel;
+            return DetalheCursoView(curso: curso);
+          },
+        ),
+      ],
+    ),
+  ],
+);
 
 ```
+> Como temos apenas uma página no momento, esta será a rota inicial do aplicativo.
+
+![](assets/images/cursos.png)
+
+## Navegando com NavigationShell
+
+Iremos utilizar a BottomNavigationBar para navegar entre as telas do aplicativo.
+
+1. Crie o arquivo src/core/ui/widgets/navigation_shell_route.dart;
+2. Copie o código abaixo para o arquivo src/core/ui/widgets/navigation_shell_route.dart;
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+class ScaffoldWithNavigationShell extends StatelessWidget {
+  const ScaffoldWithNavigationShell({super.key, required this.shell});
+
+  // Iremos para previnir issues de navegaçao e podermos criar sub-rotas nas configurações do GoRouter
+  final StatefulNavigationShell shell;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: shell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: shell.currentIndex,
+        onDestinationSelected: (index) =>
+            shell.goBranch(index, initialLocation: index == shell.currentIndex),
+        destinations: [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.assignment_outlined),
+            selectedIcon: Icon(Icons.assignment),
+            label: 'Business',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.school_outlined),
+            selectedIcon: Icon(Icons.school),
+            label: 'School',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.event_note_outlined),
+            selectedIcon: Icon(Icons.event_note),
+            label: 'Event',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.checklist_outlined),
+            selectedIcon: Icon(Icons.checklist),
+            label: 'Vestibulinho',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+```
+
+> Agora iremos ajustar a navegação inicial, incluir a página de cursos e realizar os testes iniciais de navegação.
+
+3. Ajuste o arquivo router.dart para que possamos configurar as rotas inicias, assim como suas sub-rotas;
+4. Inclua o código abaixo no arquivo router.dart;
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tcc_flutter_app/src/core/ui/widgets/navigation_shell_route.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+import 'package:tcc_flutter_app/src/features/cursos/view/cursos_view.dart';
+import 'package:tcc_flutter_app/src/features/cursos/view/detalhe_curso_view.dart';
+
+final router = GoRouter(
+  initialLocation: '/cursos',
+  routes: [
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) =>
+          ScaffoldWithNavigationShell(shell: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/home',
+              builder: (context, state) =>
+                  Container(color: Colors.red.shade100),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/projetos',
+              builder: (context, state) =>
+                  Container(color: Colors.green.shade100),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/cursos',
+              builder: (context, state) => const CursosView(),
+              routes: [
+                GoRoute(
+                  path: '/curso',
+                  builder: (context, state) {
+                    final curso = state.extra as CursoModel;
+                    return DetalheCursoView(curso: curso);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/eventos',
+              builder: (context, state) =>
+                  Container(color: Colors.blue.shade100),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/vestibulinho',
+              builder: (context, state) =>
+                  Container(color: Colors.yellow.shade100),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ],
+);
+
+```
+
+> Configuramos a navegação inicial do aplicativo, adicionando as rotas principais e suas sub-rotas. A funcionalidade de cursos já esta criada, então a deixamos configurada como rota inicial, assim como a navegação para as demais telas está ajustada; conforme implementamos novas features elas serão ajustadas.
+
 
 
 
