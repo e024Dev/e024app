@@ -583,6 +583,7 @@ final router = GoRouter(
 
 > Configuramos a navegação inicial do aplicativo, adicionando as rotas principais e suas sub-rotas. A funcionalidade de cursos já esta criada, então a deixamos configurada como rota inicial, assim como a navegação para as demais telas está ajustada; conforme implementamos novas features elas serão ajustadas.
 
+![](assets/images/navigation.png)
 
 
 
