@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tcc_flutter_app/main.dart';
-import 'package:tcc_flutter_app/src/features/tcc/view/cursos_view.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+import 'package:tcc_flutter_app/src/features/cursos/view/cursos_view.dart';
 
 class TccView extends StatefulWidget {
   const TccView({super.key});
@@ -13,11 +14,6 @@ class _TccViewState extends State<TccView> {
   int _currentIndex = 0;
   @override
   Widget build(BuildContext context) {
-    supabase.from('cursos')
-    .select()
-    .then((value) {
-      print(value);
-    });
     return Scaffold(
       appBar: AppBar(title: const Text('TCC')),
       body: IndexedStack(
