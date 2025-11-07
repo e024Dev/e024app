@@ -4,6 +4,7 @@ import 'package:tcc_flutter_app/src/core/ui/widgets/navigation_shell_route.dart'
 import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
 import 'package:tcc_flutter_app/src/features/cursos/view/cursos_view.dart';
 import 'package:tcc_flutter_app/src/features/cursos/view/detalhe_curso_view.dart';
+import 'package:tcc_flutter_app/src/features/home/view/home_view.dart';
 
 final router = GoRouter(
   initialLocation: '/cursos',
@@ -17,7 +18,7 @@ final router = GoRouter(
             GoRoute(
               path: '/home',
               builder: (context, state) =>
-                  Container(color: Colors.red.shade100),
+                  HomeView()
             ),
           ],
         ),

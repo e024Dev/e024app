@@ -585,9 +585,130 @@ final router = GoRouter(
 
 ![](assets/images/navigation.png)
 
+### Ajustando a navegaçao para a HomeView
+
+1. Ajuste o arquivo router.dart para que possamos configurar a rota para a HomeView;
+2. Inclua o código abaixo no arquivo router.dart, substituindo a ágina colorida por uma tela existente, a HomeView;
+```dart
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: '/home',
+              builder: (context, state) =>
+                  HomeView()
+            ),
+          ],
+        ),
+```
+
+3. Ajuste o arquivo home_view.dart com o código abaixo.
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class HomeView extends ConsumerWidget {
+  const HomeView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(title: const Text('Etec Alberto Feres')),
+        SliverToBoxAdapter(
+          child: Stack(
+            children: [
+              Image.network(
+                'https://images.pexels.com/photos/267885/pexels-photo-267885.jpeg',
+                fit: BoxFit.cover,
+                height: MediaQuery.of(context).size.height * .5,
+                width: MediaQuery.of(context).size.width,
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * .5,
+                width: MediaQuery.of(context).size.width,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.center,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        Colors.black12,
+                        Colors.black54,
+                        Colors.black87,
+                      ],
+                    ),
+                  ),
+                  alignment: Alignment.bottomRight,
+                  child: ListTile(
+                    leading: Icon(Icons.school, color: Colors.white),
+                    title: Text(
+                      'Cursos',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    subtitle: Text(
+                      'Projetos',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: OutlinedButton(
+                      onPressed: () {},
+                      child: Text(
+                        'Acessar',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'Projetos de destaque',
+              style: Theme.of(
+                context,
+              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: SizedBox(
+            height: 200,
+            child: CarouselView(
+              itemSnapping: true,
+              itemExtent: 300,
+              children: [
+                Container(
+                  color: Colors.red.shade500,
+                  child: Placeholder(color: Colors.red.shade200),
+                ),
+                Container(
+                  color: Colors.green.shade500,
+                  child: Placeholder(color: Colors.green.shade200),
+                ),
+                Container(
+                  color: Colors.blue.shade500,
+                  child: Placeholder(color: Colors.blue.shade200),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+```
+
+> Nesta tela estamos utilizando o CustomScrollView criarmos telas mais complexas porem mais estilizadas podendo combinar Slivers para uma melhor experiencia ao utilizar multiplos componentes com scroll.
 
 
+![](assets/images/home.png)
 
-
-
+Nos próximos passo iremo configurar a tela de projetos e consumir os projetos de forma assincrona.
 
