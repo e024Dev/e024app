@@ -67,7 +67,7 @@ final class PrestadoresProximosProvider
 }
 
 String _$prestadoresProximosHash() =>
-    r'76bf8c739ac2b8cecf411340a5b41f9b7faaac4c';
+    r'69ea1d3e229020d6e9b8ee4db23840db03180f50';
 
 final class PrestadoresProximosFamily extends $Family
     with $FunctionalFamilyOverride<FutureOr<List<PrestadorModel>>, double> {

@@ -11,7 +11,7 @@ class GoogleMapsView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final userLocation = ref.watch(userLocationsProvider);
     final prestadores = ref.watch(
-      prestadoresProximosProvider(distanciaMaxima: 5000),
+      prestadoresProximosProvider(distanciaMaxima: 10000),
     );
     return Scaffold(
       appBar: AppBar(title: const Text('Mapa')),
@@ -19,7 +19,7 @@ class GoogleMapsView extends ConsumerWidget {
         data: (data) => GoogleMap(
           indoorViewEnabled: true,
           initialCameraPosition: CameraPosition(            
-            zoom: 15,
+            zoom: 13,
             target: LatLng(
               userLocation.value!.latitude,
               userLocation.value!.longitude,

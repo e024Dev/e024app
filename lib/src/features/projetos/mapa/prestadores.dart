@@ -17,7 +17,7 @@ Future<List<PrestadorModel>> prestadoresProximos(
         params: {
           'lat': position.latitude,
           'lng': position.longitude,
-          // 'max_dist': distanciaMaxima,
+          'max': distanciaMaxima,
         },
       );
   return [
