@@ -1,13 +1,15 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tcc_flutter_app/src/core/ui/widgets/navigation_shell_route.dart';
 import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
 import 'package:tcc_flutter_app/src/features/cursos/view/cursos_view.dart';
 import 'package:tcc_flutter_app/src/features/cursos/view/detalhe_curso_view.dart';
 import 'package:tcc_flutter_app/src/features/home/view/home_view.dart';
+import 'package:tcc_flutter_app/src/features/projetos/mapa/google_maps_view.dart';
+import 'package:tcc_flutter_app/src/features/projetos/view/projetos_view.dart';
+import 'package:tcc_flutter_app/src/features/tcc/view/resumo_view.dart';
 
 final router = GoRouter(
-  initialLocation: '/cursos',
+  initialLocation: '/vestibulinho',
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
@@ -15,19 +17,14 @@ final router = GoRouter(
       branches: [
         StatefulShellBranch(
           routes: [
-            GoRoute(
-              path: '/home',
-              builder: (context, state) =>
-                  HomeView()
-            ),
+            GoRoute(path: '/home', builder: (context, state) => HomeView()),
           ],
         ),
         StatefulShellBranch(
           routes: [
             GoRoute(
               path: '/projetos',
-              builder: (context, state) =>
-                  Container(color: Colors.green.shade100),
+              builder: (context, state) => ProjetosView(),
             ),
           ],
         ),
@@ -52,8 +49,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/eventos',
-              builder: (context, state) =>
-                  Container(color: Colors.blue.shade100),
+              builder: (context, state) => GoogleMapsView(),
             ),
           ],
         ),
@@ -61,8 +57,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/vestibulinho',
-              builder: (context, state) =>
-                  Container(color: Colors.yellow.shade100),
+              builder: (context, state) => ResumoView(),
             ),
           ],
         ),
