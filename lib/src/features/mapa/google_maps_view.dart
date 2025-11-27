@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
-import 'package:tcc_flutter_app/src/features/projetos/mapa/prestadores.dart';
+import 'package:tcc_flutter_app/src/features/mapa/prestadores.dart';
 
 class GoogleMapsView extends ConsumerWidget {
   const GoogleMapsView({super.key});

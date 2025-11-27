@@ -10,7 +10,7 @@ class ProjetoWidget extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Card.filled(
+    return Card(
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       clipBehavior: Clip.antiAlias,
       child: Column(
@@ -20,22 +20,38 @@ class ProjetoWidget extends ConsumerWidget {
           SizedBox(
             height: 200,
             width: double.infinity,
-            child: Image.network(
-              projeto.urlImagem,
-              fit: BoxFit.cover,
-              cacheHeight: 200,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  projeto.urlImagem,
+                  fit: BoxFit.cover,
+                  cacheHeight: 200,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
 
-                final total = loadingProgress.expectedTotalBytes;
-                final loaded = loadingProgress.cumulativeBytesLoaded;
+                    final total = loadingProgress.expectedTotalBytes;
+                    final loaded = loadingProgress.cumulativeBytesLoaded;
 
-                return Center(
-                  child: CircularProgressIndicator(
-                    value: total != null ? loaded / total : null,
+                    return Align(
+                      alignment: Alignment.bottomCenter,
+                      child: LinearProgressIndicator(
+                        value: total != null ? loaded / total : null,
+                      ),
+                    );
+                  },
+                ),
+                Positioned(
+                  bottom: 4,
+                  right: 6,
+                  child: Chip(
+                    label: Text(projeto.curso.nome!),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.primaryContainer,
                   ),
-                );
-              },
+                ),
+              ],
             ),
           ),
           Padding(
@@ -56,15 +72,14 @@ class ProjetoWidget extends ConsumerWidget {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-
-          // Chip(label: Text(projeto.curso.nome!)),
           Align(
             alignment: Alignment.centerRight,
             child: Padding(
               padding: const EdgeInsets.only(right: 16.0, bottom: 16),
               child: FilledButton(
                 onPressed: () {
-                  context.go('/projeto', extra: projeto);
+                  //TODO: Implementar navegação para tela de projetos.
+                  // context.go('/projeto', extra: projeto);
                 },
                 child: const Text('Ver projeto'),
               ),
