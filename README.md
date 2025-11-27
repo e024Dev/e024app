@@ -1,6 +1,6 @@
 # TCShelf
 
-Neste projeto iremo criar um aplicativo que irá mostrar os TCCs de voces como uma biblioteca digital, alem de divulgar cursos oferecidos na Etec Prefeito Alberto Feres.
+Neste projeto iremos criar um aplicativo que irá mostrar os TCCs de vocês como uma biblioteca digital, além de divulgar cursos oferecidos na Etec Prefeito Alberto Feres.
 
 ## Dependências
 
