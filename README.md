@@ -937,6 +937,8 @@ Para testar a funcionalidade, você pode usar o Supabase Dashboard para inserir 
 
 > Você pode criar scripts SQL no Supabase para popular a base de dados com dados de exemplo, como cursos, projetos e alunos para testar a funcionalidade completa.
 
+> Lembre-se de substituir os links das imagens por imagens reais de sua escolha, assim como os links dos repositórios.
+
 ```shell
 CREATE TABLE cursos (
     id BIGSERIAL PRIMARY KEY,
