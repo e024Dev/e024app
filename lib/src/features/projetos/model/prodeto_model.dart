@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/aluno_model.dart';
 
 part 'prodeto_model.g.dart';
 part 'prodeto_model.freezed.dart';

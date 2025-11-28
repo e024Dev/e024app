@@ -16,7 +16,8 @@ class ProjetosRepositoryImpl implements ProjetosRepository {
     final projetos = await supabase.from('projetos')
     .select('''
       *,
-      cursos(nome)
+      cursos(*),
+      alunos_projetos(papel,alunos(*))
       ''');
     return [for (final projeto in projetos) ProjetoModel.fromJson(projeto)];
   }

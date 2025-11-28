@@ -7,14 +7,14 @@ class ImagemDestaqueWidget extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.buttonText,
-    required this.onPressed,
+    required this.callBack,
   });
 
   final String imageUrl;
   final String title;
   final String subtitle;
   final String buttonText;
-  final VoidCallback onPressed;
+  final VoidCallback callBack;
 
   @override
   Widget build(BuildContext context) {
@@ -45,20 +45,11 @@ class ImagemDestaqueWidget extends StatelessWidget {
             alignment: Alignment.bottomRight,
             child: ListTile(
               leading: Icon(Icons.school, color: Colors.white),
-              title: Text(
-                title,
-                style: TextStyle(color: Colors.white),
-              ),
-              subtitle: Text(
-                subtitle,
-                style: TextStyle(color: Colors.white),
-              ),
+              title: Text(title, style: TextStyle(color: Colors.white)),
+              subtitle: Text(subtitle, style: TextStyle(color: Colors.white)),
               trailing: OutlinedButton(
-                onPressed: () {},
-                child: Text(
-                  'Acessar',
-                  style: TextStyle(color: Colors.white),
-                ),
+                onPressed: callBack,
+                child: Text('Acessar', style: TextStyle(color: Colors.white)),
               ),
             ),
           ),

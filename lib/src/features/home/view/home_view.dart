@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tcc_flutter_app/src/features/home/view/widgets/imagem_destaque_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
@@ -12,11 +13,14 @@ class HomeView extends ConsumerWidget {
         SliverAppBar(title: const Text('Etec Alberto Feres')),
         SliverToBoxAdapter(
           child: ImagemDestaqueWidget(
-            imageUrl: 'https://images.pexels.com/photos/267885/pexels-photo-267885.jpeg',
-            title: 'TCCs',
-            subtitle: 'Projetos de destaque',
+            imageUrl:
+                'https://images.pexels.com/photos/267885/pexels-photo-267885.jpeg',
+            title: 'Vestibulinho 2025',
+            subtitle: 'Curso Técnico Gratuito',
             buttonText: 'Acessar',
-            onPressed: () {},
+            callBack: () async => _launchInBrowser(
+              Uri.parse('https://vestibulinho.etec.sp.gov.br/home/'),
+            ),
           ),
         ),
         SliverPadding(
@@ -89,5 +93,11 @@ class HomeView extends ConsumerWidget {
         ),
       ],
     );
+  }
+
+  Future<void> _launchInBrowser(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
   }
 }

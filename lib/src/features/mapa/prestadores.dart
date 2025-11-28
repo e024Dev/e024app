@@ -1,6 +1,6 @@
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
-import 'package:tcc_flutter_app/src/features/projetos/mapa/prestador_model.dart';
+import 'package:tcc_flutter_app/src/features/mapa/prestador_model.dart';
 
 part 'prestadores.g.dart';
 

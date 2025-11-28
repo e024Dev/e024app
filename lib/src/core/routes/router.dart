@@ -1,12 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tcc_flutter_app/src/core/ui/widgets/navigation_shell_route.dart';
 import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
 import 'package:tcc_flutter_app/src/features/cursos/view/cursos_view.dart';
 import 'package:tcc_flutter_app/src/features/cursos/view/detalhe_curso_view.dart';
 import 'package:tcc_flutter_app/src/features/home/view/home_view.dart';
-import 'package:tcc_flutter_app/src/features/projetos/mapa/google_maps_view.dart';
+import 'package:tcc_flutter_app/src/features/mapa/google_maps_view.dart';
 import 'package:tcc_flutter_app/src/features/projetos/view/projetos_view.dart';
-import 'package:tcc_flutter_app/src/features/tcc/view/resumo_view.dart';
 
 final router = GoRouter(
   initialLocation: '/vestibulinho',
@@ -57,7 +57,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/vestibulinho',
-              builder: (context, state) => ResumoView(),
+              builder: (context, state) => Container(color: Colors.red.shade200),
             ),
           ],
         ),
