@@ -12,6 +12,7 @@ abstract class CursoModel with _$CursoModel {
     String? descricao,
     String? ementaResumida,
     String? urlImagem,
+    bool? vestibulinho,
   }) = _CursoModel;
 
   factory CursoModel.fromJson(Map<String, dynamic> json) =>

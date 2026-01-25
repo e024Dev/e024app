@@ -12,6 +12,7 @@ _CursoModel _$CursoModelFromJson(Map<String, dynamic> json) => _CursoModel(
   descricao: json['descricao'] as String?,
   ementaResumida: json['ementa_resumida'] as String?,
   urlImagem: json['url_imagem'] as String?,
+  vestibulinho: json['vestibulinho'] as bool?,
 );
 
 Map<String, dynamic> _$CursoModelToJson(_CursoModel instance) =>
@@ -20,4 +21,5 @@ Map<String, dynamic> _$CursoModelToJson(_CursoModel instance) =>
       'descricao': instance.descricao,
       'ementa_resumida': instance.ementaResumida,
       'url_imagem': instance.urlImagem,
+      'vestibulinho': instance.vestibulinho,
     };

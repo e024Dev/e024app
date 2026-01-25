@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CursoModel {
 
-@JsonKey(name: 'id', includeToJson: false) int? get id; String? get nome; String? get descricao; String? get ementaResumida; String? get urlImagem;
+@JsonKey(name: 'id', includeToJson: false) int? get id; String? get nome; String? get descricao; String? get ementaResumida; String? get urlImagem; bool? get vestibulinho;
 /// Create a copy of CursoModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $CursoModelCopyWith<CursoModel> get copyWith => _$CursoModelCopyWithImpl<CursoMo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CursoModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nome, nome) || other.nome == nome)&&(identical(other.descricao, descricao) || other.descricao == descricao)&&(identical(other.ementaResumida, ementaResumida) || other.ementaResumida == ementaResumida)&&(identical(other.urlImagem, urlImagem) || other.urlImagem == urlImagem));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CursoModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nome, nome) || other.nome == nome)&&(identical(other.descricao, descricao) || other.descricao == descricao)&&(identical(other.ementaResumida, ementaResumida) || other.ementaResumida == ementaResumida)&&(identical(other.urlImagem, urlImagem) || other.urlImagem == urlImagem)&&(identical(other.vestibulinho, vestibulinho) || other.vestibulinho == vestibulinho));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,nome,descricao,ementaResumida,urlImagem);
+int get hashCode => Object.hash(runtimeType,id,nome,descricao,ementaResumida,urlImagem,vestibulinho);
 
 @override
 String toString() {
-  return 'CursoModel(id: $id, nome: $nome, descricao: $descricao, ementaResumida: $ementaResumida, urlImagem: $urlImagem)';
+  return 'CursoModel(id: $id, nome: $nome, descricao: $descricao, ementaResumida: $ementaResumida, urlImagem: $urlImagem, vestibulinho: $vestibulinho)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $CursoModelCopyWith<$Res>  {
   factory $CursoModelCopyWith(CursoModel value, $Res Function(CursoModel) _then) = _$CursoModelCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'id', includeToJson: false) int? id, String? nome, String? descricao, String? ementaResumida, String? urlImagem
+@JsonKey(name: 'id', includeToJson: false) int? id, String? nome, String? descricao, String? ementaResumida, String? urlImagem, bool? vestibulinho
 });
 
 
@@ -65,14 +65,15 @@ class _$CursoModelCopyWithImpl<$Res>
 
 /// Create a copy of CursoModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? nome = freezed,Object? descricao = freezed,Object? ementaResumida = freezed,Object? urlImagem = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = freezed,Object? nome = freezed,Object? descricao = freezed,Object? ementaResumida = freezed,Object? urlImagem = freezed,Object? vestibulinho = freezed,}) {
   return _then(_self.copyWith(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,nome: freezed == nome ? _self.nome : nome // ignore: cast_nullable_to_non_nullable
 as String?,descricao: freezed == descricao ? _self.descricao : descricao // ignore: cast_nullable_to_non_nullable
 as String?,ementaResumida: freezed == ementaResumida ? _self.ementaResumida : ementaResumida // ignore: cast_nullable_to_non_nullable
 as String?,urlImagem: freezed == urlImagem ? _self.urlImagem : urlImagem // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,vestibulinho: freezed == vestibulinho ? _self.vestibulinho : vestibulinho // ignore: cast_nullable_to_non_nullable
+as bool?,
   ));
 }
 
@@ -157,10 +158,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', includeToJson: false)  int? id,  String? nome,  String? descricao,  String? ementaResumida,  String? urlImagem)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', includeToJson: false)  int? id,  String? nome,  String? descricao,  String? ementaResumida,  String? urlImagem,  bool? vestibulinho)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CursoModel() when $default != null:
-return $default(_that.id,_that.nome,_that.descricao,_that.ementaResumida,_that.urlImagem);case _:
+return $default(_that.id,_that.nome,_that.descricao,_that.ementaResumida,_that.urlImagem,_that.vestibulinho);case _:
   return orElse();
 
 }
@@ -178,10 +179,10 @@ return $default(_that.id,_that.nome,_that.descricao,_that.ementaResumida,_that.u
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', includeToJson: false)  int? id,  String? nome,  String? descricao,  String? ementaResumida,  String? urlImagem)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'id', includeToJson: false)  int? id,  String? nome,  String? descricao,  String? ementaResumida,  String? urlImagem,  bool? vestibulinho)  $default,) {final _that = this;
 switch (_that) {
 case _CursoModel():
-return $default(_that.id,_that.nome,_that.descricao,_that.ementaResumida,_that.urlImagem);case _:
+return $default(_that.id,_that.nome,_that.descricao,_that.ementaResumida,_that.urlImagem,_that.vestibulinho);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -198,10 +199,10 @@ return $default(_that.id,_that.nome,_that.descricao,_that.ementaResumida,_that.u
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id', includeToJson: false)  int? id,  String? nome,  String? descricao,  String? ementaResumida,  String? urlImagem)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'id', includeToJson: false)  int? id,  String? nome,  String? descricao,  String? ementaResumida,  String? urlImagem,  bool? vestibulinho)?  $default,) {final _that = this;
 switch (_that) {
 case _CursoModel() when $default != null:
-return $default(_that.id,_that.nome,_that.descricao,_that.ementaResumida,_that.urlImagem);case _:
+return $default(_that.id,_that.nome,_that.descricao,_that.ementaResumida,_that.urlImagem,_that.vestibulinho);case _:
   return null;
 
 }
@@ -213,7 +214,7 @@ return $default(_that.id,_that.nome,_that.descricao,_that.ementaResumida,_that.u
 
 @JsonSerializable(fieldRename: FieldRename.snake)
 class _CursoModel implements CursoModel {
-  const _CursoModel({@JsonKey(name: 'id', includeToJson: false) this.id, this.nome, this.descricao, this.ementaResumida, this.urlImagem});
+  const _CursoModel({@JsonKey(name: 'id', includeToJson: false) this.id, this.nome, this.descricao, this.ementaResumida, this.urlImagem, this.vestibulinho});
   factory _CursoModel.fromJson(Map<String, dynamic> json) => _$CursoModelFromJson(json);
 
 @override@JsonKey(name: 'id', includeToJson: false) final  int? id;
@@ -221,6 +222,7 @@ class _CursoModel implements CursoModel {
 @override final  String? descricao;
 @override final  String? ementaResumida;
 @override final  String? urlImagem;
+@override final  bool? vestibulinho;
 
 /// Create a copy of CursoModel
 /// with the given fields replaced by the non-null parameter values.
@@ -235,16 +237,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CursoModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nome, nome) || other.nome == nome)&&(identical(other.descricao, descricao) || other.descricao == descricao)&&(identical(other.ementaResumida, ementaResumida) || other.ementaResumida == ementaResumida)&&(identical(other.urlImagem, urlImagem) || other.urlImagem == urlImagem));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CursoModel&&(identical(other.id, id) || other.id == id)&&(identical(other.nome, nome) || other.nome == nome)&&(identical(other.descricao, descricao) || other.descricao == descricao)&&(identical(other.ementaResumida, ementaResumida) || other.ementaResumida == ementaResumida)&&(identical(other.urlImagem, urlImagem) || other.urlImagem == urlImagem)&&(identical(other.vestibulinho, vestibulinho) || other.vestibulinho == vestibulinho));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,nome,descricao,ementaResumida,urlImagem);
+int get hashCode => Object.hash(runtimeType,id,nome,descricao,ementaResumida,urlImagem,vestibulinho);
 
 @override
 String toString() {
-  return 'CursoModel(id: $id, nome: $nome, descricao: $descricao, ementaResumida: $ementaResumida, urlImagem: $urlImagem)';
+  return 'CursoModel(id: $id, nome: $nome, descricao: $descricao, ementaResumida: $ementaResumida, urlImagem: $urlImagem, vestibulinho: $vestibulinho)';
 }
 
 
@@ -255,7 +257,7 @@ abstract mixin class _$CursoModelCopyWith<$Res> implements $CursoModelCopyWith<$
   factory _$CursoModelCopyWith(_CursoModel value, $Res Function(_CursoModel) _then) = __$CursoModelCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'id', includeToJson: false) int? id, String? nome, String? descricao, String? ementaResumida, String? urlImagem
+@JsonKey(name: 'id', includeToJson: false) int? id, String? nome, String? descricao, String? ementaResumida, String? urlImagem, bool? vestibulinho
 });
 
 
@@ -272,14 +274,15 @@ class __$CursoModelCopyWithImpl<$Res>
 
 /// Create a copy of CursoModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? nome = freezed,Object? descricao = freezed,Object? ementaResumida = freezed,Object? urlImagem = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = freezed,Object? nome = freezed,Object? descricao = freezed,Object? ementaResumida = freezed,Object? urlImagem = freezed,Object? vestibulinho = freezed,}) {
   return _then(_CursoModel(
 id: freezed == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int?,nome: freezed == nome ? _self.nome : nome // ignore: cast_nullable_to_non_nullable
 as String?,descricao: freezed == descricao ? _self.descricao : descricao // ignore: cast_nullable_to_non_nullable
 as String?,ementaResumida: freezed == ementaResumida ? _self.ementaResumida : ementaResumida // ignore: cast_nullable_to_non_nullable
 as String?,urlImagem: freezed == urlImagem ? _self.urlImagem : urlImagem // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,vestibulinho: freezed == vestibulinho ? _self.vestibulinho : vestibulinho // ignore: cast_nullable_to_non_nullable
+as bool?,
   ));
 }
 

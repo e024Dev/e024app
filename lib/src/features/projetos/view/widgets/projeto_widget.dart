@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
-import 'package:go_router/go_router.dart';
 
 class ProjetoWidget extends ConsumerWidget {
   const ProjetoWidget({super.key, required this.projeto});
