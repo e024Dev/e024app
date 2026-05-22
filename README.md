@@ -25,6 +25,8 @@ flutter pub add flutter_dotenv flutter_riverpod freezed_annotation go_router jso
 flutter pub add --dev build_runner freezed riverpod_generator
 ```
 
+> Devido às novas versões, o pacote freezed apresenta incompatibilidade com o json_serializable, inclua no arquivo `pubspec.yaml` a versão exata `  json_serializable: ">=6.13.0 <6.13.2"`
+
 ## Criando a classe App
 
 1. Crie o arquivo src/app.dart;
