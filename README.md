@@ -1017,47 +1017,47 @@ VALUES
  -- ÁREAS DE ATUAÇÃO
 INSERT INTO areas_atuacao (id_curso, descricao)
 VALUES
-(19, 'Desenvolvimento Web e Mobile'),
-(19, 'Análise de Sistemas'),
-(20, 'Gestão Empresarial e Empreendedorismo'),
-(20, 'Recursos Humanos e Finanças'),
-(21, 'Controle e Automação de Processos'),
-(21, 'Robótica e Instrumentação'),
-(22, 'Design e Desenvolvimento Web'),
-(22, 'E-commerce e Marketing Digital');
+(1, 'Desenvolvimento Web e Mobile'),
+(1, 'Análise de Sistemas'),
+(2, 'Gestão Empresarial e Empreendedorismo'),
+(2, 'Recursos Humanos e Finanças'),
+(3, 'Controle e Automação de Processos'),
+(3, 'Robótica e Instrumentação'),
+(3, 'Design e Desenvolvimento Web'),
+(3, 'E-commerce e Marketing Digital');
 
 -- COORDENADORES
 INSERT INTO coordenadores (id_curso, nome, email, telefone)
 VALUES
-(19, 'Prof. Carlos Henrique Moraes', 'carlos.moraes@etec.sp.gov.br', '(19) 3543-1234'),
-(20, 'Profa. Juliana Batista Lopes', 'juliana.lopes@etec.sp.gov.br', '(19) 3543-5678'),
-(21, 'Prof. Renato Sampaio Silva', 'renato.sampaio@etec.sp.gov.br', '(19) 3543-8765'),
-(22, 'Profa. Adriana Pires Martins', 'adriana.martins@etec.sp.gov.br', '(19) 3543-9988');
+(1, 'Prof. Carlos Henrique Moraes', 'carlos.moraes@etec.sp.gov.br', '(19) 3543-1234'),
+(2, 'Profa. Juliana Batista Lopes', 'juliana.lopes@etec.sp.gov.br', '(19) 3543-5678'),
+(3, 'Prof. Renato Sampaio Silva', 'renato.sampaio@etec.sp.gov.br', '(19) 3543-8765'),
+(3, 'Profa. Adriana Pires Martins', 'adriana.martins@etec.sp.gov.br', '(19) 3543-9988');
 
 -- PROJETOS
 INSERT INTO projetos (id_curso, titulo, descricao, link_externo, imagem_capa)
 VALUES
-(19, 'SmartRecycle - Sistema de Coleta Inteligente', 
+(1, 'SmartRecycle - Sistema de Coleta Inteligente', 
  'Aplicativo mobile e web para gestão e gamificação da coleta seletiva em bairros de Araras, com integração via API Supabase.',
  'https://github.com/eetec-araras/smartrecycle',
  'https://etec-albertoferes.sp.gov.br/imagens/projetos/smartrecycle.jpg'),
 
-(19, 'Jokenpo+ - Jogo Interativo em Flutter', 
+(1, 'Jokenpo+ - Jogo Interativo em Flutter', 
  'Versão expandida do clássico jogo Jokenpo (Pedra, Papel, Tesoura, Lagarto e Spock) com ranking de jogadores e integração com Supabase.',
  'https://github.com/eetec-araras/jokenpo-plus',
  'https://etec-albertoferes.sp.gov.br/imagens/projetos/jokenpo.jpg'),
 
-(20, 'EcoGestão - Sustentabilidade Empresarial', 
+(2, 'EcoGestão - Sustentabilidade Empresarial', 
  'Plataforma de monitoramento de indicadores de sustentabilidade para pequenas empresas da região de Araras.',
  'https://github.com/eetec-araras/ecogestao',
  'https://etec-albertoferes.sp.gov.br/imagens/projetos/ecogestao.jpg'),
 
-(21, 'RobotArmX - Braço Robótico Didático', 
+(3, 'RobotArmX - Braço Robótico Didático', 
  'Protótipo funcional de braço robótico controlado via interface web e microcontroladores ESP32, com sensores de precisão.',
  'https://github.com/eetec-araras/robotarmx',
  'https://etec-albertoferes.sp.gov.br/imagens/projetos/robotarmx.jpg'),
 
-(22, 'Portal ETEC Digital', 
+(3, 'Portal ETEC Digital', 
  'Portal integrado para divulgação de eventos, notícias e projetos da Etec, desenvolvido com Flutter Web e Supabase.',
  'https://github.com/eetec-araras/etec-digital',
  'https://etec-albertoferes.sp.gov.br/imagens/projetos/portal.jpg');
