@@ -22,7 +22,7 @@ Na raiz do projeto execute o seguintes comandos:
 ```bash
 flutter pub add flutter_dotenv flutter_riverpod freezed_annotation go_router json_annotation riverpod_annotation supabase_flutter
 
-flutter pub add --dev build_runner freezed json_serializable riverpod_generator
+flutter pub add --dev build_runner freezed riverpod_generator
 ```
 
 ## Criando a classe App
