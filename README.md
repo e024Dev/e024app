@@ -1,434 +1,102 @@
 # TCShelf
 
-Neste projeto iremos criar um aplicativo que irá mostrar os TCCs de vocês como uma biblioteca digital, além de divulgar cursos oferecidos na Etec Prefeito Alberto Feres.
+Aplicativo biblioteca digital de TCCs e divulgação de cursos da Etec Prefeito Alberto Feres.
 
-## Dependências
+## Stack
 
-Neste projeto iremos utilizar as seguintes dependências:
+- **Supabase** — Banco de dados e API
+- **Riverpod** — Gerenciamento de estado
+- **Freezed** — Modelos imutáveis com geração de código
+- **GoRouter** — Navegação com bottom navigation
+- **Google Maps** — Mapa com geolocalização
+- **build_runner** — Geração de código
 
-- Supabase - Banco de dados
-- Riverpod - Gerenciamento de estado
-- Riverpod_annotation - Anotações para Riverpod
-- Riverpod_generator - Geração de código para Riverpod
-- Freezed - Geração de código para classes imutáveis
-- Freezed_annotation - Anotações para Freezed
-- Build_runner - Geração de código
-- DotEnv - Variáveis de ambiente
+## Setup
 
-### Instalando dependências
+Crie o arquivo `.env` na raiz (não versionado):
 
-Na raiz do projeto execute o seguintes comandos:
+```
+SUPABASE_URL=sua_url
+SUPABASE_ANON_KEY=sua_chave
+```
+
+Instale as dependências e gere os arquivos de código:
 
 ```bash
-flutter pub add flutter_dotenv flutter_riverpod freezed_annotation go_router json_annotation riverpod_annotation supabase_flutter
-
-flutter pub add --dev build_runner freezed riverpod_generator
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs
 ```
 
-> Devido às novas versões, o pacote freezed apresenta incompatibilidade com o json_serializable, inclua no arquivo `pubspec.yaml` a versão exata `  json_serializable: ">=6.13.0 <6.13.2"`
+> Rode o build_runner sempre que alterar modelos `@freezed` ou providers `@riverpod`.
 
-## Criando a classe App
+## Arquitetura
 
-1. Crie o arquivo src/app.dart;
-2. Copie o código abaixo para o arquivo src/app.dart;
+MVVM com pastas organizadas por funcionalidade (feature) em `lib/src/features/`:
+
+```
+lib/
+├── main.dart                    # Entrada do app
+├── src/
+│   ├── app.dart                 # Widget raiz (MaterialApp.router)
+│   ├── core/
+│   │   ├── providers/           # Providers globais
+│   │   ├── routes/              # Configuração do GoRouter
+│   │   └── ui/widgets/          # Widgets compartilhados
+│   └── features/
+│       ├── home/                # Tela inicial
+│       │   ├── model/           # (se houver)
+│       │   ├── view/            # HomeView, widgets
+│       │   └── viewmodel/       # (se houver)
+│       ├── cursos/              # Cursos da Etec
+│       │   ├── model/           # CursoModel, repository
+│       │   ├── view/            # CursosView, DetalheCursoView
+│       │   └── viewmodel/       # CursosViewModel
+│       ├── projetos/            # Projetos (TCCs)
+│       │   ├── model/           # ProjetoModel, AlunoModel, repositories
+│       │   ├── view/            # ProjetosView, ProjetoDetalheView
+│       │   └── viewmodel/       # ProjetosViewModel
+│       ├── mapa/                # Mapa com prestadores próximos
+│       ├── vestibulinho/        # Cursos com processo seletivo
+│       └── counter/             # Exemplo simples de Riverpod
+```
+
+Cada feature segue:
+
+| Camada | Finalidade | Tecnologia |
+|--------|-----------|------------|
+| `model/` | Dados + regras de negócio | `@freezed`, repository interface |
+| `viewmodel/` | Estado da UI | Provider `@riverpod` |
+| `view/` | Interface do usuário | `ConsumerWidget` |
+
+---
+
+## 1. Core — Configuração base
+
+### 1.1 entrypoint (`main.dart`)
 
 ```dart
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
-
-class App extends ConsumerWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp.router (
-      routerConfig: null,
-    );
-  }
-}
-```
-
-## Ajustar o main.dart
-
-1. Abra o arquivo main.dart;
-2. Copie o código abaixo para o arquivo main.dart;
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:tcc_flutter_app/src/app.dart';
-
-void main() {
-  runApp(const App());
-}
-```
-
-## Configurando o Supabase
-
-1. No arquivo main.dart, ajuste o código para inicializar o Supabase;
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:tcc_flutter_app/src/app.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tcc_flutter_app/src/app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env'); 
+  await dotenv.load(fileName: '.env');
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!, 
+    url: dotenv.env['SUPABASE_URL']!,
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
   runApp(ProviderScope(child: const App()));
 }
 ```
 
-## Configurando o dotenv
-
-O dotenv é um package que permite que você crie variáveis de ambiente para sua aplicação, protegendo-as no código-fonte.
-
-1. Crie o arquivo .env na raiz do projeto;
-2. Copie o código abaixo para o arquivo .env;
-
-```dart
-SUPABASE_URL=sua_url_supabase
-SUPABASE_ANON_KEY=sua_chave_anonima_supabase
-```
-
-> Lembre-se de substituir os valores de SUPABASE_URL e SUPABASE_ANON_KEY pelo valores do seu projeto no Supabase. Já fizemos estas configurações em sala de aula, utilize sua credenciais do Supabase.
-
-> Lembre-se de adicionar o arquivo .env na pasta .gitignore, para que ele não seja enviado para o repositório remoto.
-
-
-
-
-## Utilizando o MVVM como estrutura de arquitetura
-
-Nós iremos utilizar o MVVM como estrutura de arquitetura para o nosso aplicativo. O MVVM é um padrão de arquitetura que permite que você separe a lógica de negócios da interface do usuário.
-
-Os providers irão gerenciar o estado da aplicação, ou seja, irão controlar os dados que serão exibidos na interface do usuário.
-
-Iremos utilizar vários providers me nosso aplicativo, eles serão a base para a criação de um estado global da aplicação, assim como o pattern MVVM.
-
-### Criando nossos primeiros providers
-
-1. Crie o arquivo src/core/providers/app_providers.dart;
-2. Copie o código abaixo para o arquivo src/core/providers/app_providers.dart;
-
-```dart
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-final darkModeProvider = StateProvider<bool>((ref) => false);
-final supabaseProvider = Provider<SupabaseClient>((ref) => Supabase.instance.client);
-```
-
-> O `Provider` é um provider que permite que você compartilhe o estado de uma variável globalmente na aplicação, o `StateProvider` além de compartilhar o estado de uma variável globalmente na aplicação, ele permite que você altere o estado de uma variável globalmente na aplicação.
-
-Iremos reutilizar o `SupabaseClient` em todos os providers que precisarem de acesso ao banco de dados.
-
-### Criando o Model
-
-1. Crie o arquivo src/features/cursos/model/curso_model.dart;
-2. Copie o código abaixo para o arquivo src/features/cursos/model/curso_model.dart;
-
-```dart
-import 'package:freezed_annotation/freezed_annotation.dart';
-
-part 'curso_model.g.dart';
-part 'curso_model.freezed.dart';
-
-@freezed
-class CursoModel with _$CursoModel {
-  const factory CursoModel({
-    required String id,
-    required String nome,
-    required String descricao,
-    required String professor,
-    required String imagem,
-  }) = _CursoModel;
-
-  factory CursoModel.fromJson(Map<String, dynamic> json) =>
-      _$CursoModelFromJson(json);
-}
-```
-
-> Execute o comando abaixo para gerar o código do model:
-
-```bash
-flutter pub run build_runner build -d
-```
-
-### Criando o Repository de Cursos
-
-Iremo utulizar o pattern `Repository` para criar um repositório de cursos.
-
-1. Crie o arquivo src/features/cursos/model/repository/curso_repository.dart;
-2. Copie o código abaixo para o arquivo src/features/cursos/model/repository/curso_repository.dart;
-
-```dart
-import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
-
-abstract class CursoRepository {
-  Future<List<CursoModel>> getCursos();
-}
-```
-
-### Criando o RepositoryImpl
-
-1. Crie o arquivo src/features/cursos/model/repository/curso_repository_impl.dart;
-2. Copie o código abaixo para o arquivo src/features/cursos/model/repository/curso_repository_impl.dart;
-
-```dart
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/repository/curso_repository.dart';
-
-part 'curso_repository_impl.g.dart';
-
-@riverpod
-class CursoRepositoryImpl extends _$CursoRepositoryImpl implements CursoRepository {
-  @override
-  Future<List<CursoModel>> getCursos() async {
-    final cursos = await ref.watch(supabaseProvider).from('cursos').select();
-    return [for(final curso in cursos) CursoModel.fromJson(curso)];
-  }
-}
-```
-
-### Criando o provider para o repositorio de cursos
-
-1. Altere o arquivo curso_repository_impl.dart para:
-
-```dart
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/repository/curso_repository.dart';
-
-part 'curso_repository_impl.g.dart';
-
-@riverpod
-class CursoRepositoryImpl extends _$CursoRepositoryImpl implements CursoRepository {
-  @override
-  Future<List<CursoModel>> getCursos() async {
-    final cursos = await ref.watch(supabaseProvider).from('cursos').select();
-    return [for(final curso in cursos) CursoModel.fromJson(curso)];
-  }
-}
-
-// Provider para o repositorio de cursos
-@riverpod
-cursoRepositoryImpl (Ref ref) {
-  return CursoRepositoryImpl(supabase: ref.watch(supabaseProvider));
-}
-```
-
-> Acima criamos o provider para o repositorio de cursos, ele será reutilizado como injecao de dependencia no projeto.
-
-### Criando o View Model
-
-1. Crie o arquivo src/features/cursos/viewmodel/cursos_viewmodel.dart;
-2. Copie o código abaixo para o arquivo src/features/cursos/viewmodel/cursos_viewmodel.dart;
-
-```dart
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/repository/curso_repository_impl.dart';
-
-part 'cursos_viewmodel.g.dart';
-
-@Riverpod(keepAlive: true)
-class CursosViewModel extends _$CursosViewModel {
-  @override
-  FutureOr<List<CursoModel>> build() async {
-    return ref.watch(cursoRepositoryImplProvider).getCursos();
-  }
-}
-```
-
-3. Execute o comando abaixo para gerar o código do view model:
-
-```bash
-flutter pub run build_runner build -d
-```
-
-> Agora o view model foi gerado e ele irá utilizar o repositorio de cursos para buscar os cursos para gerar o estado ao qual nossas Views irão se inscrever para receber os cursos.
-
-### Criando a View CursosView
-
-1. Crie o arquivo src/features/cursos/view/cursos_view.dart;
-2. Copie o código abaixo para o arquivo src/features/cursos/view/cursos_view.dart;
+### 1.2 Widget raiz (`app.dart`)
 
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tcc_flutter_app/src/features/cursos/view/widgets/lista_cursos_widget.dart';
-import 'package:tcc_flutter_app/src/features/cursos/viewmodel/cursos_viewmodel.dart';
-
-class CursosView extends ConsumerWidget {
-  const CursosView({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final cursos = ref.watch(cursosViewModelProvider);
-    return Scaffold(
-      appBar: AppBar(title: const Text('Cursos')),
-      body: cursos.when(
-        data: (cursos) {
-          return ListaCursosWidget(cursos: cursos);
-        },
-        error: (error, stackTrace) =>
-            const Center(child: Text('Erro ao carregar cursos')),
-        loading: () => const Center(child: CircularProgressIndicator()),
-      ),
-    );
-  }
-}
-```
-> Utilizamos o `ConsumerWidget` para que possamos utilizar o `WidgetRef` para acessar o `Provider` que irá nos fornecer os cursos. Também utilizamos o when para que possamos mostrar uma mensagem de loading, error ou data, este é um recurso do `riverpod` que nos ajuda a gerenciar o estado de forma mais simples.
-
-
-3. Crie o arquivo src/features/cursos/view/widgets/lista_cursos_widget.dart;
-4. Copie o código abaixo para o arquivo src/features/cursos/view/widgets/lista_cursos_widget.dart;
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
-
-class ListaCursosWidget extends StatelessWidget {
-  const ListaCursosWidget({super.key, required this.cursos});
-
-  final List<CursoModel> cursos;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      itemCount: cursos.length,
-      itemBuilder: (context, index) {
-        final curso = cursos[index];
-        return ListTile(
-          leading: CircleAvatar(child: Text(curso.nome!.substring(0, 1))),
-          title: Text(curso.nome!),
-          subtitle: Text(curso.descricao!),
-        );
-      },
-      separatorBuilder: (BuildContext context, int index) => const Divider(),
-    );
-  }
-}
-
-```
-5. Crie o arquivo src/features/cursos/view/detalhe_curso_view.dart;
-6. Copie o código abaixo para o arquivo src/features/cursos/view/detalhe_curso_view.dart;
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
-
-class DetalheCursoView extends StatelessWidget {
-  const DetalheCursoView({super.key, required this.curso});
-
-  final CursoModel curso;
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      slivers: [
-        SliverAppBar(
-          expandedHeight: 250,
-          pinned: true,
-          flexibleSpace: FlexibleSpaceBar(
-            centerTitle: true,
-            background: Image.network(
-              curso.urlImagem!,
-              fit: BoxFit.cover,
-              cacheHeight: 250,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                final total = loadingProgress.expectedTotalBytes;
-                final loaded = loadingProgress.cumulativeBytesLoaded;
-                return Align(
-                  alignment: Alignment.bottomCenter,
-                  child: LinearProgressIndicator(
-                    value: total != null ? loaded / total : null,
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-        SliverList(
-          delegate: SliverChildListDelegate([
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: Text(curso.nome!, style: Theme.of(context).textTheme.titleLarge),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: Text(curso.descricao!, style: Theme.of(context).textTheme.bodyLarge),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: Text(curso.ementaResumida!, style: Theme.of(context).textTheme.bodyLarge),
-            ),
-          ]),
-        ),
-        SliverFillRemaining(),
-      ],
-    );
-  }
-}
-```
-## Utilizando o GoRouter para a navegação no aplicativo
-
-Nós iremos utilizar o package `go_router` para a navegação no aplicativo. O GoRouter é um package que permite que você crie rotas para sua aplicação de forma simples e eficiente. 
-
-> Agora que as views foram criadas, vamos criar as rotas para elas.
-
-
-### Criando as rotas
-
-1. Crie o arquivo src/core/routes/router.dart;
-2. Copie o código abaixo para o arquivo src/core/routes/router.dart;
-
-> Este código irá definir as rotas do aplicativo, no momento apenas as rotas de cursos e detalhes de cursos.
-
-```dart
-import 'package:go_router/go_router.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
-import 'package:tcc_flutter_app/src/features/cursos/view/cursos_view.dart';
-final router = GoRouter(
-  initialLocation: '/cursos',
-  routes: [
-  GoRoute(
-    path: '/cursos',
-    builder: (context, state) => const CursosView(),
-    routes: [
-      GoRoute(
-        path: '/curso',
-        builder: (context, state) {
-          final curso = state.extra as CursoModel;
-          return DetalheCursoView(curso: curso);
-        },
-      )
-    ]
-  ),
-]);
-```
-
-### Inicializando o GoRouter
-
-1. Ajuste o arquivo app.dart para inicializar o GoRouter;
-2. Inclua o objeto router no MaterialApp.router, no arquivo src/app.dart;
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
 import 'package:tcc_flutter_app/src/core/routes/router.dart';
 
 class App extends ConsumerWidget {
@@ -436,125 +104,51 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MaterialApp.router (
+    return MaterialApp.router(
       routerConfig: router,
     );
   }
 }
 ```
 
-## Navegando com GoRouter
-
-Precisamos ajustar o arquivo cursos_view.dart para que possamos navegar para a tela de detalhes do curso.
-
-1. Ajuste o arquivo cursos_view.dart para que possamos navegar para a tela de detalhes do curso;
-2. No arquivo ListaCursosWidget, ajuste o onTap para que possamos navegar para a tela de detalhes do curso;
-
+### 1.3 Providers globais (`core/providers/app_providers.dart`)
 
 ```dart
-import 'package:go_router/go_router.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
-import 'package:tcc_flutter_app/src/features/cursos/view/cursos_view.dart';
-import 'package:tcc_flutter_app/src/features/cursos/view/detalhe_curso_view.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-final router = GoRouter(
-  initialLocation: '/cursos',
-  routes: [
-    GoRoute(
-      path: '/cursos',
-      builder: (context, state) => const CursosView(),
-      routes: [
-        GoRoute(
-          path: '/curso',
-          builder: (context, state) {
-            final curso = state.extra as CursoModel;
-            return DetalheCursoView(curso: curso);
-          },
-        ),
-      ],
-    ),
-  ],
-);
+part 'app_providers.g.dart';
 
-```
-> Como temos apenas uma página no momento, esta será a rota inicial do aplicativo.
+final darkModeProvider = StateProvider<bool>((ref) => false);
+final supabaseProvider = Provider<SupabaseClient>((ref) => Supabase.instance.client);
 
-![](assets/images/cursos.png)
-
-## Navegando com NavigationShell
-
-Iremos utilizar a BottomNavigationBar para navegar entre as telas do aplicativo.
-
-1. Crie o arquivo src/core/ui/widgets/navigation_shell_route.dart;
-2. Copie o código abaixo para o arquivo src/core/ui/widgets/navigation_shell_route.dart;
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-
-class ScaffoldWithNavigationShell extends StatelessWidget {
-  const ScaffoldWithNavigationShell({super.key, required this.shell});
-
-  // Iremos para previnir issues de navegaçao e podermos criar sub-rotas nas configurações do GoRouter
-  final StatefulNavigationShell shell;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: shell,
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: shell.currentIndex,
-        onDestinationSelected: (index) =>
-            shell.goBranch(index, initialLocation: index == shell.currentIndex),
-        destinations: [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.assignment_outlined),
-            selectedIcon: Icon(Icons.assignment),
-            label: 'Business',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.school_outlined),
-            selectedIcon: Icon(Icons.school),
-            label: 'School',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.event_note_outlined),
-            selectedIcon: Icon(Icons.event_note),
-            label: 'Event',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.checklist_outlined),
-            selectedIcon: Icon(Icons.checklist),
-            label: 'Vestibulinho',
-          ),
-        ],
-      ),
-    );
-  }
+@riverpod
+Future<Position> userLocations(Ref ref) async {
+  await Geolocator.requestPermission();
+  return await Geolocator.getCurrentPosition();
 }
-
 ```
 
-> Agora iremos ajustar a navegação inicial, incluir a página de cursos e realizar os testes iniciais de navegação.
-
-3. Ajuste o arquivo router.dart para que possamos configurar as rotas inicias, assim como suas sub-rotas;
-4. Inclua o código abaixo no arquivo router.dart;
+### 1.4 Navegação (`core/routes/router.dart`)
 
 ```dart
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tcc_flutter_app/src/core/ui/widgets/navigation_shell_route.dart';
 import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
 import 'package:tcc_flutter_app/src/features/cursos/view/cursos_view.dart';
 import 'package:tcc_flutter_app/src/features/cursos/view/detalhe_curso_view.dart';
+import 'package:tcc_flutter_app/src/features/home/view/home_view.dart';
+import 'package:tcc_flutter_app/src/features/mapa/google_maps_view.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
+import 'package:tcc_flutter_app/src/features/projetos/view/projeto_detalhe_view.dart';
+import 'package:tcc_flutter_app/src/features/projetos/view/projetos_view.dart';
+import 'package:tcc_flutter_app/src/features/vestibulinho/vestibulinho_view.dart';
 
 final router = GoRouter(
-  initialLocation: '/cursos',
+  initialLocation: '/vestibulinho',
   routes: [
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) =>
@@ -562,19 +156,23 @@ final router = GoRouter(
       branches: [
         StatefulShellBranch(
           routes: [
-            GoRoute(
-              path: '/home',
-              builder: (context, state) =>
-                  Container(color: Colors.red.shade100),
-            ),
+            GoRoute(path: '/home', builder: (context, state) => HomeView()),
           ],
         ),
         StatefulShellBranch(
           routes: [
             GoRoute(
               path: '/projetos',
-              builder: (context, state) =>
-                  Container(color: Colors.green.shade100),
+              builder: (context, state) => ProjetosView(),
+              routes: [
+                GoRoute(
+                  path: '/detalhe',
+                  builder: (context, state) {
+                    final projeto = state.extra as ProjetoModel;
+                    return ProjetoDetalheView(projeto: projeto);
+                  },
+                ),
+              ],
             ),
           ],
         ),
@@ -599,8 +197,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/eventos',
-              builder: (context, state) =>
-                  Container(color: Colors.blue.shade100),
+              builder: (context, state) => GoogleMapsView(),
             ),
           ],
         ),
@@ -608,8 +205,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/vestibulinho',
-              builder: (context, state) =>
-                  Container(color: Colors.yellow.shade100),
+              builder: (context, state) => VestibulinhoView(),
             ),
           ],
         ),
@@ -617,34 +213,136 @@ final router = GoRouter(
     ),
   ],
 );
-
 ```
 
-> Configuramos a navegação inicial do aplicativo, adicionando as rotas principais e suas sub-rotas. A funcionalidade de cursos já esta criada, então a deixamos configurada como rota inicial, assim como a navegação para as demais telas está ajustada; conforme implementamos novas features elas serão ajustadas.
+### 1.5 NavigationShell (`core/ui/widgets/navigation_shell_route.dart`)
 
-![](assets/images/navigation.png)
-
-### Ajustando a navegaçao para a HomeView
-
-1. Ajuste o arquivo router.dart para que possamos configurar a rota para a HomeView;
-2. Inclua o código abaixo no arquivo router.dart, substituindo a ágina colorida por uma tela existente, a HomeView;
 ```dart
-        StatefulShellBranch(
-          routes: [
-            GoRoute(
-              path: '/home',
-              builder: (context, state) =>
-                  HomeView()
-            ),
-          ],
-        ),
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+
+class ScaffoldWithNavigationShell extends StatelessWidget {
+  const ScaffoldWithNavigationShell({super.key, required this.shell});
+
+  final StatefulNavigationShell shell;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: shell,
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: shell.currentIndex,
+        onDestinationSelected: (index) =>
+            shell.goBranch(index, initialLocation: index == shell.currentIndex),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.assignment_outlined),
+            selectedIcon: Icon(Icons.assignment),
+            label: 'Projetos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.school_outlined),
+            selectedIcon: Icon(Icons.school),
+            label: 'Cursos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.event_note_outlined),
+            selectedIcon: Icon(Icons.event_note),
+            label: 'Eventos',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.checklist_outlined),
+            selectedIcon: Icon(Icons.checklist),
+            label: 'Vestibulinho',
+          ),
+        ],
+      ),
+    );
+  }
+}
 ```
 
-3. Ajuste o arquivo home_view.dart com o código abaixo.
+---
+
+## 2. Feature: Home
+
+### 2.1 Widgets reutilizáveis
+
+**`ImagemDestaqueWidget`** — Exibe uma imagem com overlay gradiente, título e botão:
+
+```dart
+class ImagemDestaqueWidget extends StatelessWidget {
+  const ImagemDestaqueWidget({
+    super.key,
+    required this.imageUrl,
+    required this.title,
+    required this.subtitle,
+    required this.buttonText,
+    required this.callBack,
+  });
+
+  final String imageUrl;
+  final String title;
+  final String subtitle;
+  final String buttonText;
+  final VoidCallback callBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          height: MediaQuery.of(context).size.height * .5,
+          width: MediaQuery.of(context).size.width,
+        ),
+        SizedBox(
+          height: MediaQuery.of(context).size.height * .5,
+          width: MediaQuery.of(context).size.width,
+          child: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.center,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.transparent,
+                  Colors.black12,
+                  Colors.black54,
+                  Colors.black87,
+                ],
+              ),
+            ),
+            alignment: Alignment.bottomRight,
+            child: ListTile(
+              leading: Icon(Icons.school, color: Colors.white),
+              title: Text(title, style: TextStyle(color: Colors.white)),
+              subtitle: Text(subtitle, style: TextStyle(color: Colors.white)),
+              trailing: OutlinedButton(
+                onPressed: callBack,
+                child: Text('Acessar', style: TextStyle(color: Colors.white)),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+```
+
+### 2.2 HomeView
 
 ```dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tcc_flutter_app/src/features/home/view/widgets/imagem_destaque_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
@@ -655,52 +353,15 @@ class HomeView extends ConsumerWidget {
       slivers: [
         SliverAppBar(title: const Text('Etec Alberto Feres')),
         SliverToBoxAdapter(
-          child: Stack(
-            children: [
-              Image.network(
+          child: ImagemDestaqueWidget(
+            imageUrl:
                 'https://images.pexels.com/photos/267885/pexels-photo-267885.jpeg',
-                fit: BoxFit.cover,
-                height: MediaQuery.of(context).size.height * .5,
-                width: MediaQuery.of(context).size.width,
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * .5,
-                width: MediaQuery.of(context).size.width,
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.center,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black12,
-                        Colors.black54,
-                        Colors.black87,
-                      ],
-                    ),
-                  ),
-                  alignment: Alignment.bottomRight,
-                  child: ListTile(
-                    leading: Icon(Icons.school, color: Colors.white),
-                    title: Text(
-                      'Cursos',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    subtitle: Text(
-                      'Projetos',
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    trailing: OutlinedButton(
-                      onPressed: () {},
-                      child: Text(
-                        'Acessar',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            title: 'Vestibulinho 2025',
+            subtitle: 'Curso Técnico Gratuito',
+            buttonText: 'Acessar',
+            callBack: () async => _launchInBrowser(
+              Uri.parse('https://vestibulinho.etec.sp.gov.br/home/'),
+            ),
           ),
         ),
         SliverPadding(
@@ -708,9 +369,10 @@ class HomeView extends ConsumerWidget {
           sliver: SliverToBoxAdapter(
             child: Text(
               'Projetos de destaque',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
           ),
         ),
@@ -740,28 +402,269 @@ class HomeView extends ConsumerWidget {
       ],
     );
   }
-}
 
+  Future<void> _launchInBrowser(Uri url) async {
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
+    }
+  }
+}
 ```
 
-> Nesta tela estamos utilizando o CustomScrollView criarmos telas mais complexas porem mais estilizadas podendo combinar Slivers para uma melhor experiencia ao utilizar multiplos componentes com scroll.
+---
 
+## 3. Feature: Cursos
 
-![](assets/images/home.png)
+### 3.1 Model
 
-Nos próximos passo iremo configurar a tela de projetos e consumir os projetos de forma assincrona.
+```dart
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-## Projetos
+part 'curso_model.freezed.dart';
+part 'curso_model.g.dart';
 
-Iremos criar a tela de projetos, consumir os dados da API e exibi-los em uma lista. Essa tela utilizará um ConsumerWidget do Riverpod para gerenciar o estado dos projetos e carregar os dados de forma assíncrona, apresentando-os em uma lista vertical.
+@freezed
+abstract class CursoModel with _$CursoModel {
+  @JsonSerializable(fieldRename: FieldRename.snake)
+  const factory CursoModel({
+    @JsonKey(name: 'id', includeToJson: false) int? id,
+    String? nome,
+    String? descricao,
+    String? ementaResumida,
+    String? urlImagem,
+    bool? vestibulinho,
+  }) = _CursoModel;
 
-A tela será composta por um AppBar com título, um corpo com um ListView.Builder para exibir os projetos e um LinearProgressIndicator para mostrar o carregamento da imagem de cada projeto.
+  factory CursoModel.fromJson(Map<String, dynamic> json) =>
+      _$CursoModelFromJson(json);
+}
+```
 
-Cada item da lista conterá o nome do projeto, uma breve descrição e a imagem do projeto, carregada de forma assíncrona e um botão para navegação para tela de detalhamento.
+### 3.2 Repository — Interface
 
-### Criando da camada de modelo (Model)
+```dart
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
 
-1. Criar o modelo AlunoModel com os campos necessários para representar um aluno no sistema.
+abstract class CursoRepository {
+  Future<List<CursoModel>> getCursos();
+}
+```
+
+### 3.3 Repository — Implementação
+
+```dart
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/repository/curso_repository.dart';
+
+part 'curso_repository_impl.g.dart';
+
+class CursoRepositoryImpl implements CursoRepository {
+  final SupabaseClient supabase;
+
+  CursoRepositoryImpl({required this.supabase});
+
+  @override
+  Future<List<CursoModel>> getCursos() async {
+    final response = await supabase.from('cursos').select();
+    return [for (final curso in response) CursoModel.fromJson(curso)];
+  }
+}
+
+@riverpod
+CursoRepositoryImpl cursoRepositoryImpl(Ref ref) {
+  return CursoRepositoryImpl(supabase: ref.watch(supabaseProvider));
+}
+```
+
+### 3.4 ViewModel
+
+```dart
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/repository/curso_repository_impl.dart';
+
+part 'cursos_viewmodel.g.dart';
+
+@Riverpod(keepAlive: true)
+class CursosViewModel extends _$CursosViewModel {
+  @override
+  FutureOr<List<CursoModel>> build() async {
+    return ref.watch(cursoRepositoryImplProvider).getCursos();
+  }
+}
+```
+
+### 3.5 Views
+
+**CursosView** — Tela principal que lista os cursos:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tcc_flutter_app/src/features/cursos/view/widgets/lista_cursos_widget.dart';
+import 'package:tcc_flutter_app/src/features/cursos/viewmodel/cursos_viewmodel.dart';
+
+class CursosView extends ConsumerWidget {
+  const CursosView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cursos = ref.watch(cursosViewModelProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Cursos')),
+      body: cursos.when(
+        data: (cursos) => ListaCursosWidget(cursos: cursos),
+        error: (error, stackTrace) =>
+            const Center(child: Text('Erro ao carregar cursos')),
+        loading: () => const Center(child: CircularProgressIndicator()),
+      ),
+    );
+  }
+}
+```
+
+**ListaCursosWidget** — Lista com navegação para detalhe:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+
+class ListaCursosWidget extends StatelessWidget {
+  const ListaCursosWidget({super.key, required this.cursos});
+
+  final List<CursoModel> cursos;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      itemCount: cursos.length,
+      itemBuilder: (context, index) {
+        final curso = cursos[index];
+        return ListTile(
+          leading: CircleAvatar(
+              child: Text((curso.nome ?? '?').substring(0, 1))),
+          title: Text(curso.nome ?? ''),
+          subtitle: Text(curso.descricao ?? ''),
+          onTap: () => context.go('/cursos/curso', extra: curso),
+        );
+      },
+      separatorBuilder: (context, index) => const Divider(),
+    );
+  }
+}
+```
+
+**DetalheCursoView** — Tela de detalhe do curso com SliverAppBar:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+
+class DetalheCursoView extends StatelessWidget {
+  const DetalheCursoView({super.key, required this.curso});
+
+  final CursoModel curso;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomScrollView(
+      slivers: [
+        SliverAppBar(
+          expandedHeight: 250,
+          pinned: true,
+          flexibleSpace: FlexibleSpaceBar(
+            background: Image.network(
+              curso.urlImagem ?? '',
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Icon(Icons.school,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
+              loadingBuilder: (context, child, loadingProgress) {
+                if (loadingProgress == null) return child;
+                final total = loadingProgress.expectedTotalBytes;
+                final loaded = loadingProgress.cumulativeBytesLoaded;
+                return Align(
+                  alignment: Alignment.bottomCenter,
+                  child: LinearProgressIndicator(
+                    value: total != null ? loaded / total : null,
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+        SliverList(
+          delegate: SliverChildListDelegate([
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Text(
+                curso.nome ?? '',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Text(
+                curso.descricao ?? '',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+              child: Text(
+                curso.ementaResumida ?? '',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+          ]),
+        ),
+        SliverFillRemaining(),
+      ],
+    );
+  }
+}
+```
+
+---
+
+## 4. Feature: Projetos
+
+### 4.1 Models
+
+**ProjetoModel:**
+
+```dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+
+part 'prodeto_model.g.dart';
+part 'prodeto_model.freezed.dart';
+
+@freezed
+abstract class ProjetoModel with _$ProjetoModel {
+  @JsonSerializable(fieldRename: FieldRename.snake)
+  const factory ProjetoModel({
+    @JsonKey(includeToJson: false) int? id,
+    required String titulo,
+    required String descricao,
+    @JsonKey(name: 'link_externo') required String url,
+    @JsonKey(name: 'imagem_capa') required String urlImagem,
+    @JsonKey(name: 'cursos') required CursoModel curso,
+  }) = _ProjetoModel;
+
+  factory ProjetoModel.fromJson(Map<String, dynamic> json) =>
+      _$ProjetoModelFromJson(json);
+}
+```
+
+**AlunoModel:**
+
 ```dart
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -778,62 +681,75 @@ abstract class AlunoModel with _$AlunoModel {
     required String fotoPerfil,
   }) = _AlunoModel;
 
-  factory AlunoModel.fromJson(Map<String, dynamic> json) => _$AlunoModelFromJson(json);
-}
-```
-2. Criar o modelo "ProjetoModel" para representar os projetos.
-
-```dart
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
-
-part 'projeto_model.g.dart';
-part 'projeto_model.freezed.dart';
-
-@freezed
-abstract class ProjetoModel with _$ProjetoModel {
-  @JsonSerializable(fieldRename: FieldRename.snake)
-  const factory ProjetoModel({
-    @JsonKey(includeToJson: false)
-    int? id,
-    required String titulo,
-    required String descricao,
-    @JsonKey(name: 'link_externo')
-    required String url,
-    @JsonKey(name: 'imagem_capa')
-    required String urlImagem,
-    @JsonKey(name: 'cursos')
-    required CursoModel curso,
-  }) = _ProjetoModel;
-  factory ProjetoModel.fromJson(Map<String, dynamic> json) => _$ProjetoModelFromJson(json);
+  factory AlunoModel.fromJson(Map<String, dynamic> json) =>
+      _$AlunoModelFromJson(json);
 }
 ```
 
-3. Crie o modelo AlunoProjeto para representar a relação entre alunos e projetos.
+**AlunoProjetoModel** (relacionamento N:N entre alunos e projetos):
 
 ```dart
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:tcc_flutter_app/src/features/projetos/model/projeto_model.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/aluno_model.dart';
 
 part 'aluno_projeto_model.g.dart';
 part 'aluno_projeto_model.freezed.dart';
 
 @freezed
 abstract class AlunoProjetoModel with _$AlunoProjetoModel {
-  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory AlunoProjetoModel({
-    @JsonKey(includeToJson: false)
-    int? id,
-    required int alunoId,
-    required int projetoId,
-    required ProjetoModel projeto,
+    required String papel,
+    @JsonKey(name: 'alunos') required AlunoModel aluno,
   }) = _AlunoProjetoModel;
-  
-  factory AlunoProjetoModel.fromJson(Map<String, dynamic> json) => _$AlunoProjetoModelFromJson(json);
+
+  factory AlunoProjetoModel.fromJson(Map<String, dynamic> json) =>
+      _$AlunoProjetoModelFromJson(json);
 }
 ```
 
-4. Crie a interface AlunosRepository para gerenciar os dados dos alunos e sua relação com projetos.
+### 4.2 Repositories
+
+**ProjetosRepository:**
+
+```dart
+import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
+
+abstract class ProjetosRepository {
+  Future<List<ProjetoModel>> findAll();
+}
+```
+
+```dart
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/repositories/projetos_repository.dart';
+
+part 'projetos_repository_impl.g.dart';
+
+class ProjetosRepositoryImpl implements ProjetosRepository {
+  final SupabaseClient supabase;
+
+  ProjetosRepositoryImpl({required this.supabase});
+
+  @override
+  Future<List<ProjetoModel>> findAll() async {
+    final projetos = await supabase
+        .from('projetos')
+        .select('*, cursos(*)');
+    return [for (final projeto in projetos) ProjetoModel.fromJson(projeto)];
+  }
+}
+
+@riverpod
+ProjetosRepository projetosRepository(Ref ref) {
+  return ProjetosRepositoryImpl(supabase: ref.watch(supabaseProvider));
+}
+```
+
+**AlunosRepository:**
+
 ```dart
 import 'package:tcc_flutter_app/src/features/projetos/model/aluno_projeto_model.dart';
 
@@ -842,14 +758,12 @@ abstract class AlunosRepository {
 }
 ```
 
-5. Crie a implementação concreta do repositório AlunosRepository.
-
 ```dart
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
 import 'package:tcc_flutter_app/src/features/projetos/model/aluno_projeto_model.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:tcc_flutter_app/src/features/projetos/model/repositories/alunos_repository.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'alunos_repository_impl.g.dart';
 
@@ -863,9 +777,9 @@ class AlunosRepositoryImpl implements AlunosRepository {
     final rows = await supabase
         .from('alunos_projetos')
         .select('''
-      papel,
-      alunos!inner(id, nome, email, foto_perfil)  
-      ''')
+          papel,
+          alunos!inner(id, nome, email, foto_perfil)
+        ''')
         .eq('id_projeto', idProjeto);
 
     return [for (final row in rows) AlunoProjetoModel.fromJson(row)];
@@ -878,76 +792,683 @@ AlunosRepository alunosRepository(Ref ref) {
 }
 ```
 
-6. Crie a interface ProjetosRepository para gerenciar os dados dos projetos.
+### 4.3 ViewModel
 
 ```dart
-import 'package:tcc_flutter_app/src/features/projetos/model/projeto_model.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/repositories/projetos_repository_impl.dart';
 
-abstract class ProjetosRepository {
-  Future<List<ProjetoModel>> findAll();
+part 'projetos_viewmodel.g.dart';
+
+@Riverpod(keepAlive: true)
+FutureOr<List<ProjetoModel>> projetos(Ref ref) {
+  return ref.watch(projetosRepositoryProvider).findAll();
 }
 ```
 
-6. Crie a implementação concreta do repositório ProjetosRepository.
+### 4.4 Views
+
+**ProjetosView** — Lista todos os projetos:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tcc_flutter_app/src/features/projetos/viewmodel/projetos_viewmodel.dart';
+import 'package:tcc_flutter_app/src/features/projetos/view/widgets/lista_projetos_widget.dart';
+
+class ProjetosView extends ConsumerWidget {
+  const ProjetosView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final projetos = ref.watch(projetosProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Projetos')),
+      body: projetos.when(
+        data: (data) => ListaProjetosWidget(projetos: data),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) =>
+            const Center(child: Text('Erro ao carregar projetos.')),
+      ),
+    );
+  }
+}
+```
+
+**ProjetoWidget** — Card individual com imagem, título, descrição, chip do curso e botão:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
+
+class ProjetoWidget extends ConsumerWidget {
+  const ProjetoWidget({super.key, required this.projeto});
+
+  final ProjetoModel projeto;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Card(
+      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: 200,
+            width: double.infinity,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.network(
+                  projeto.urlImagem,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    child: Icon(Icons.broken_image,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    final total = loadingProgress.expectedTotalBytes;
+                    final loaded = loadingProgress.cumulativeBytesLoaded;
+                    return Align(
+                      alignment: Alignment.bottomCenter,
+                      child: LinearProgressIndicator(
+                        value: total != null ? loaded / total : null,
+                      ),
+                    );
+                  },
+                ),
+                Positioned(
+                  bottom: 4,
+                  right: 6,
+                  child: Chip(
+                    label: Text(projeto.curso.nome ?? ''),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Text(
+              projeto.titulo,
+              style: Theme.of(context).textTheme.titleLarge,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              projeto.descricao,
+              style: Theme.of(context).textTheme.bodyMedium,
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16, bottom: 16),
+              child: FilledButton(
+                onPressed: () =>
+                    context.go('/projetos/detalhe', extra: projeto),
+                child: const Text('Ver projeto'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+**ProjetoDetalheView** — Tela de detalhe com informações, alunos e link externo:
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/aluno_projeto_model.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/repositories/alunos_repository_impl.dart';
+
+class ProjetoDetalheView extends ConsumerWidget {
+  const ProjetoDetalheView({super.key, required this.projeto});
+
+  final ProjetoModel projeto;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final alunosRepo = ref.watch(alunosRepositoryProvider);
+
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            expandedHeight: 250,
+            pinned: true,
+            flexibleSpace: FlexibleSpaceBar(
+              background: Image.network(
+                projeto.urlImagem,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                  child: Icon(Icons.broken_image,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant),
+                ),
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  final total = loadingProgress.expectedTotalBytes;
+                  final loaded = loadingProgress.cumulativeBytesLoaded;
+                  return Align(
+                    alignment: Alignment.bottomCenter,
+                    child: LinearProgressIndicator(
+                      value: total != null ? loaded / total : null,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Chip(label: Text(projeto.curso.nome ?? 'Curso')),
+                  const SizedBox(height: 8),
+                  Text(
+                    projeto.titulo,
+                    style: Theme.of(context)
+                        .textTheme
+                        .headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(projeto.descricao,
+                      style: Theme.of(context).textTheme.bodyLarge),
+                  const SizedBox(height: 24),
+                  Text(
+                    'Alunos participantes',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleLarge
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                ],
+              ),
+            ),
+          ),
+          FutureBuilder<List<AlunoProjetoModel>>(
+            future: alunosRepo.findByProjetoId(projeto.id!),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const SliverToBoxAdapter(
+                  child: Center(child: CircularProgressIndicator()),
+                );
+              }
+              if (snapshot.hasError) {
+                return SliverToBoxAdapter(
+                  child: Center(child: Text('Erro ao carregar alunos')),
+                );
+              }
+              final alunos = snapshot.data ?? [];
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    final alunoProjeto = alunos[index];
+                    final aluno = alunoProjeto.aluno;
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundImage: aluno.fotoPerfil.isNotEmpty
+                            ? NetworkImage(aluno.fotoPerfil)
+                            : null,
+                        child: aluno.fotoPerfil.isEmpty
+                            ? Text(aluno.nome.isNotEmpty
+                                ? aluno.nome[0].toUpperCase()
+                                : '?')
+                            : null,
+                      ),
+                      title: Text(aluno.nome),
+                      subtitle: Text(
+                        alunoProjeto.papel.isNotEmpty
+                            ? alunoProjeto.papel
+                            : 'Participante',
+                      ),
+                    );
+                  },
+                  childCount: alunos.length,
+                ),
+              );
+            },
+          ),
+          SliverFillRemaining(
+            hasScrollBody: false,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Center(
+                child: FilledButton.icon(
+                  onPressed: () async {
+                    final uri = Uri.parse(projeto.url);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri,
+                          mode: LaunchMode.externalApplication);
+                    }
+                  },
+                  icon: const Icon(Icons.open_in_new),
+                  label: const Text('Ver projeto completo'),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+---
+
+## 5. Feature: Mapa
+
+Exibe prestadores de serviços próximos no Google Maps usando geolocalização.
+
+### 5.1 Model
+
+```dart
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'prestador_model.g.dart';
+part 'prestador_model.freezed.dart';
+
+@freezed
+abstract class PrestadorModel with _$PrestadorModel {
+  const factory PrestadorModel({
+    @JsonKey(includeToJson: false) required String id,
+    required String nome,
+    required String endereco,
+    required double latitude,
+    required double longitude,
+    required double distancia,
+  }) = _PrestadorModel;
+
+  factory PrestadorModel.fromJson(Map<String, dynamic> json) =>
+      _$PrestadorModelFromJson(json);
+}
+```
+
+### 5.2 Provider com RPC
 
 ```dart
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
-import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:tcc_flutter_app/src/features/projetos/model/repositories/projetos_repository.dart';
+import 'package:tcc_flutter_app/src/features/mapa/prestador_model.dart';
 
-part 'projetos_repository_impl.g.dart';
+part 'prestadores.g.dart';
 
-class ProjetosRepositoryImpl implements ProjetosRepository {
-  final SupabaseClient supabase;
+@riverpod
+Future<List<PrestadorModel>> prestadoresProximos(
+  Ref ref, {
+  double distanciaMaxima = 5000,
+}) async {
+  final position = await ref.watch(userLocationsProvider.future);
+  final response = await ref
+      .read(supabaseProvider)
+      .rpc('buscar_prestadores_proximos', params: {
+    'lat': position.latitude,
+    'lng': position.longitude,
+    'max': distanciaMaxima,
+  });
+  return [for (final item in response) PrestadorModel.fromJson(item)];
+}
+```
 
-  ProjetosRepositoryImpl({required this.supabase});
+### 5.3 GoogleMapsView
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
+import 'package:tcc_flutter_app/src/features/mapa/prestadores.dart';
+
+class GoogleMapsView extends ConsumerWidget {
+  const GoogleMapsView({super.key});
 
   @override
-  Future<List<ProjetoModel>> findAll() async {
-    final projetos = await supabase.from('projetos')
-    .select('''
-      *,
-      cursos(nome)
-      ''');
-    return [for (final projeto in projetos) ProjetoModel.fromJson(projeto)];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userLocation = ref.watch(userLocationsProvider);
+    final prestadores = ref.watch(
+      prestadoresProximosProvider(distanciaMaxima: 10000),
+    );
+    return Scaffold(
+      appBar: AppBar(title: const Text('Mapa')),
+      body: prestadores.when(
+        data: (data) => GoogleMap(
+          indoorViewEnabled: true,
+          initialCameraPosition: CameraPosition(
+            zoom: 13,
+            target: LatLng(
+              userLocation.value!.latitude,
+              userLocation.value!.longitude,
+            ),
+          ),
+          markers: {
+            for (final prestador in data)
+              Marker(
+                markerId: MarkerId(prestador.id),
+                position: LatLng(prestador.latitude, prestador.longitude),
+                infoWindow: InfoWindow(
+                  title: prestador.nome,
+                  snippet: prestador.endereco,
+                ),
+              ),
+          },
+        ),
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (error, stackTrace) =>
+            const Center(child: Text('Erro ao carregar prestadores')),
+      ),
+    );
+  }
+}
+```
+
+---
+
+## 6. Feature: Vestibulinho
+
+Lista cursos que possuem processo seletivo (campo `vestibulinho = true`).
+
+### 6.1 Repository
+
+```dart
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+
+abstract interface class CursoVestibulinhoRepository {
+  Future<List<CursoModel>> findAll();
+}
+```
+
+```dart
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+import 'package:tcc_flutter_app/src/features/vestibulinho/model/curso_vestibulinho_repository.dart';
+
+part 'curso_vestibulinho_repository_impl.g.dart';
+
+class CursoVestibulinhoRepositoryImpl implements CursoVestibulinhoRepository {
+  final SupabaseClient supabase;
+
+  CursoVestibulinhoRepositoryImpl({required this.supabase});
+
+  @override
+  Future<List<CursoModel>> findAll() async {
+    final response =
+        await supabase.from('cursos').select('*').eq('vestibulinho', true);
+    return [for (final curso in response) CursoModel.fromJson(curso)];
   }
 }
 
 @riverpod
-ProjetosRepository projetosRepository(Ref ref) {
-  return ProjetosRepositoryImpl(supabase: ref.watch(supabaseProvider));
+CursoVestibulinhoRepository cursoVestibulinhoRepository(Ref ref) {
+  return CursoVestibulinhoRepositoryImpl(supabase: ref.watch(supabaseProvider));
 }
 ```
 
-7. Agora execute o build_runner para poder gerar os arquivos necessários:
+### 6.2 ViewModel
 
-```bash
-flutter pub run build_runner build --delete-conflicting-outputs
+```dart
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
+import 'package:tcc_flutter_app/src/features/vestibulinho/model/curso_vestibulinho_repository_impl.dart';
+
+part 'curso_vestibulinho_viewmodel.g.dart';
+
+@riverpod
+FutureOr<List<CursoModel>> cursosVestibulinho(Ref ref) async {
+  return await ref.read(cursoVestibulinhoRepositoryProvider).findAll();
+}
 ```
 
-> Isso vai gerar os arquivos necessários para o Riverpod funcionar corretamente.
+### 6.3 VestibulinhoView
 
-> Crie os registros na sua base de dados no Supabase para testar a funcionalidade.
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:tcc_flutter_app/src/features/vestibulinho/viewmodel/curso_vestibulinho_viewmodel.dart';
+import 'package:tcc_flutter_app/src/features/vestibulinho/widgets/curso_vestibulinho_widget.dart';
 
-Agora você tem uma estrutura completa para gerenciar projetos e alunos com Riverpod e Supabase. O código está organizado em camadas, seguindo boas práticas de arquitetura.
+class VestibulinhoView extends ConsumerWidget {
+  const VestibulinhoView({super.key});
 
-Para testar a funcionalidade, você pode usar o Supabase Dashboard para inserir alguns registros de projetos e alunos, e depois executar o aplicativo para ver os dados sendo carregados.
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final cursosVestibulinho = ref.watch(cursosVestibulinhoProvider);
+    return Scaffold(
+      appBar: AppBar(title: const Text('Vestibulinho')),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Image.network(
+              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyJM_JeVrhRCXONOdo4yDz_jLkkUK13JY_wbLmxtoVeA&s=10',
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                height: 150,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.school,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      const SizedBox(height: 8),
+                      Text('Vestibulinho',
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            cursosVestibulinho.when(
+              data: (cursos) => Column(
+                children: List.generate(
+                  cursos.length,
+                  (index) => Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 4, horizontal: 8),
+                    child: CursoVestibulinhoWidget(curso: cursos[index]),
+                  ),
+                ),
+              ),
+              error: (error, stackTrace) =>
+                  Center(child: Text(error.toString())),
+              loading: () => Container(),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final uri = Uri.parse('https://vestibulinho.etec.sp.gov.br/home/');
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        },
+        label: const Text('INSCREVA-SE'),
+        icon: const Icon(Icons.link),
+      ),
+    );
+  }
+}
+```
 
-### Scripts para gerar dados de testes 
+### 6.4 CursoVestibulinhoWidget
 
-> Você pode criar scripts SQL no Supabase para popular a base de dados com dados de exemplo, como cursos, projetos e alunos para testar a funcionalidade completa.
+```dart
+import 'package:flutter/material.dart';
+import 'package:tcc_flutter_app/src/features/cursos/model/curso_model.dart';
 
-> Lembre-se de substituir os links das imagens por imagens reais de sua escolha, assim como os links dos repositórios.
+class CursoVestibulinhoWidget extends StatelessWidget {
+  const CursoVestibulinhoWidget({super.key, required this.curso});
 
-```shell
+  final CursoModel curso;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        children: [
+          Flexible(
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.network(
+                  curso.urlImagem ?? '',
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Container(
+                        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        child: Icon(Icons.broken_image,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      ),
+                ),
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    curso.nome ?? 'Curso',
+                    style: Theme.of(context).textTheme.titleLarge,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    curso.descricao ?? '',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+---
+
+## 7. Exemplo: Counter
+
+Um contador simples com `StateProvider` e `@riverpod` para demonstrar o padrão básico do Riverpod.
+
+### ViewModel
+
+```dart
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'counter_viewmodel.g.dart';
+
+@riverpod
+class CounterViewModel extends _$CounterViewModel {
+  @override
+  int build() => 0;
+
+  void increment() => state++;
+}
+```
+
+### View
+
+```dart
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tcc_flutter_app/src/core/providers/app_providers.dart';
+import 'package:tcc_flutter_app/src/features/counter/viewmodel/counter_viewmodel.dart';
+
+class CounterView extends ConsumerWidget {
+  const CounterView({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final counter = ref.watch(counterViewModelProvider);
+    final viewmodel = ref.read(counterViewModelProvider.notifier);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Counter'),
+        actions: [
+          IconButton(
+            onPressed: () =>
+                ref.read(darkModeProvider.notifier).update((state) => !state),
+            icon: ref.watch(darkModeProvider)
+                ? const Icon(Icons.light_mode)
+                : const Icon(Icons.dark_mode),
+          ),
+        ],
+      ),
+      body: Center(
+        child: Text(
+          counter.toString(),
+          style: Theme.of(context).textTheme.displayLarge,
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => viewmodel.increment(),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+```
+
+---
+
+## 8. Banco de Dados (Supabase)
+
+Execute os scripts abaixo no SQL Editor do Supabase para criar as tabelas e popular com dados de exemplo.
+
+### Tabelas
+
+```sql
 CREATE TABLE cursos (
     id BIGSERIAL PRIMARY KEY,
     nome TEXT NOT NULL UNIQUE,
-    descricao TEXT,          
-    ementa_resumida TEXT,    
-    url_imagem TEXT,    
+    descricao TEXT,
+    ementa_resumida TEXT,
+    url_imagem TEXT,
+    vestibulinho BOOLEAN DEFAULT false,
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -970,8 +1491,8 @@ CREATE TABLE projetos (
     id_curso BIGINT NOT NULL REFERENCES cursos(id) ON DELETE CASCADE,
     titulo TEXT NOT NULL,
     descricao TEXT,
-    link_externo TEXT, 
-    imagem_capa TEXT,  
+    link_externo TEXT,
+    imagem_capa TEXT,
     criado_em TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -990,31 +1511,83 @@ CREATE TABLE alunos_projetos (
     papel TEXT,
     UNIQUE(id_aluno, id_projeto)
 );
+```
 
+### Função RPC (para o Mapa)
+
+```sql
+CREATE OR REPLACE FUNCTION buscar_prestadores_proximos(
+    lat DOUBLE PRECISION,
+    lng DOUBLE PRECISION,
+    max_dist DOUBLE PRECISION DEFAULT 5000
+)
+RETURNS TABLE(
+    id TEXT,
+    nome TEXT,
+    endereco TEXT,
+    latitude DOUBLE PRECISION,
+    longitude DOUBLE PRECISION,
+    distancia DOUBLE PRECISION
+)
+LANGUAGE plpgsql AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        p.id::TEXT,
+        p.nome,
+        p.endereco,
+        p.latitude,
+        p.longitude,
+        -- Cálculo de distância aproximada (Haversine simplificado)
+        6371000 * 2 * ASIN(SQRT(
+            POW(SIN(RADIANS(p.latitude - lat) / 2), 2) +
+            COS(RADIANS(lat)) * COS(RADIANS(p.latitude)) *
+            POW(SIN(RADIANS(p.longitude - lng) / 2), 2)
+        )) AS distancia
+    FROM prestadores p
+    WHERE 6371000 * 2 * ASIN(SQRT(
+        POW(SIN(RADIANS(p.latitude - lat) / 2), 2) +
+        COS(RADIANS(lat)) * COS(RADIANS(p.latitude)) *
+        POW(SIN(RADIANS(p.longitude - lng) / 2), 2)
+    )) <= max_dist
+    ORDER BY distancia;
+END;
+$$;
+```
+
+> Nota: Crie também uma tabela `prestadores` com os campos `id (BIGSERIAL)`, `nome (TEXT)`, `endereco (TEXT)`, `latitude (DOUBLE PRECISION)`, `longitude (DOUBLE PRECISION)` e popula com dados de estabelecimentos próximos à Etec.
+
+### Dados de exemplo
+
+```sql
 -- CURSOS
-INSERT INTO cursos (nome, descricao, ementa_resumida, url_imagem)
+INSERT INTO cursos (nome, descricao, ementa_resumida, url_imagem, vestibulinho)
 VALUES
-('Desenvolvimento de Sistemas', 
+('Desenvolvimento de Sistemas',
  'Curso voltado à formação de profissionais capazes de projetar, implementar e manter sistemas computacionais.',
  'Lógica de programação, banco de dados, desenvolvimento web e mobile, versionamento de código, APIs e integração de sistemas.',
- 'https://etec-albertoferes.sp.gov.br/imagens/curso-ds.jpg'),
+ 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80',
+ true),
 
-('Administração', 
+('Administração',
  'Forma profissionais aptos a planejar, executar e avaliar atividades administrativas em empresas públicas e privadas.',
  'Gestão empresarial, marketing, contabilidade, economia e empreendedorismo.',
- 'https://etec-albertoferes.sp.gov.br/imagens/curso-adm.jpg'),
+ 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=1200&q=80',
+ true),
 
-('Automação Industrial', 
+('Automação Industrial',
  'Capacita o aluno a desenvolver e manter sistemas automatizados de controle de processos industriais.',
  'Eletroeletrônica, sensores, controladores lógicos programáveis (CLP), instrumentação e robótica.',
- 'https://etec-albertoferes.sp.gov.br/imagens/curso-auto.jpg'),
+ 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80',
+ true),
 
-('Informática para Internet', 
+('Informática para Internet',
  'Forma técnicos capazes de criar, projetar e implementar soluções baseadas em tecnologias web.',
  'Desenvolvimento front-end e back-end, UX/UI, hospedagem e otimização de sites.',
- 'https://etec-albertoferes.sp.gov.br/imagens/curso-info.jpg');
+ 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1200&q=80',
+ false);
 
- -- ÁREAS DE ATUAÇÃO
+-- ÁREAS DE ATUAÇÃO
 INSERT INTO areas_atuacao (id_curso, descricao)
 VALUES
 (1, 'Desenvolvimento Web e Mobile'),
@@ -1037,41 +1610,41 @@ VALUES
 -- PROJETOS
 INSERT INTO projetos (id_curso, titulo, descricao, link_externo, imagem_capa)
 VALUES
-(1, 'SmartRecycle - Sistema de Coleta Inteligente', 
+(1, 'SmartRecycle - Sistema de Coleta Inteligente',
  'Aplicativo mobile e web para gestão e gamificação da coleta seletiva em bairros de Araras, com integração via API Supabase.',
  'https://github.com/eetec-araras/smartrecycle',
- 'https://etec-albertoferes.sp.gov.br/imagens/projetos/smartrecycle.jpg'),
+ 'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=1200&q=80'),
 
-(1, 'Jokenpo+ - Jogo Interativo em Flutter', 
+(1, 'Jokenpo+ - Jogo Interativo em Flutter',
  'Versão expandida do clássico jogo Jokenpo (Pedra, Papel, Tesoura, Lagarto e Spock) com ranking de jogadores e integração com Supabase.',
  'https://github.com/eetec-araras/jokenpo-plus',
- 'https://etec-albertoferes.sp.gov.br/imagens/projetos/jokenpo.jpg'),
+ 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80'),
 
-(2, 'EcoGestão - Sustentabilidade Empresarial', 
+(2, 'EcoGestão - Sustentabilidade Empresarial',
  'Plataforma de monitoramento de indicadores de sustentabilidade para pequenas empresas da região de Araras.',
  'https://github.com/eetec-araras/ecogestao',
- 'https://etec-albertoferes.sp.gov.br/imagens/projetos/ecogestao.jpg'),
+ 'https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1200&q=80'),
 
-(3, 'RobotArmX - Braço Robótico Didático', 
+(3, 'RobotArmX - Braço Robótico Didático',
  'Protótipo funcional de braço robótico controlado via interface web e microcontroladores ESP32, com sensores de precisão.',
  'https://github.com/eetec-araras/robotarmx',
- 'https://etec-albertoferes.sp.gov.br/imagens/projetos/robotarmx.jpg'),
+ 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=1200&q=80'),
 
-(3, 'Portal ETEC Digital', 
+(3, 'Portal ETEC Digital',
  'Portal integrado para divulgação de eventos, notícias e projetos da Etec, desenvolvido com Flutter Web e Supabase.',
  'https://github.com/eetec-araras/etec-digital',
- 'https://etec-albertoferes.sp.gov.br/imagens/projetos/portal.jpg');
+ 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80');
 
- -- ALUNOS
+-- ALUNOS
 INSERT INTO alunos (nome, email, foto_perfil)
 VALUES
-('Lucas Ferreira da Silva', 'lucas.silva@etecalbertoferes.com', 'https://etec-albertoferes.sp.gov.br/alunos/lucas.jpg'),
-('Maria Eduarda Campos', 'maria.campos@etecalbertoferes.com', 'https://etec-albertoferes.sp.gov.br/alunos/maria.jpg'),
-('Rafael Lima Santos', 'rafael.lima@etecalbertoferes.com', 'https://etec-albertoferes.sp.gov.br/alunos/rafael.jpg'),
-('Beatriz Andrade Souza', 'beatriz.souza@etecalbertoferes.com', 'https://etec-albertoferes.sp.gov.br/alunos/beatriz.jpg'),
-('João Pedro Oliveira', 'joao.oliveira@etecalbertoferes.com', 'https://etec-albertoferes.sp.gov.br/alunos/joao.jpg');
+('Lucas Ferreira da Silva', 'lucas.silva@etecalbertoferes.com', 'https://ui-avatars.com/api/?name=Lucas+Ferreira+da+Silva&background=2563eb&color=fff&size=512'),
+('Maria Eduarda Campos', 'maria.campos@etecalbertoferes.com', 'https://ui-avatars.com/api/?name=Maria+Eduarda+Campos&background=db2777&color=fff&size=512'),
+('Rafael Lima Santos', 'rafael.lima@etecalbertoferes.com', 'https://ui-avatars.com/api/?name=Rafael+Lima+Santos&background=16a34a&color=fff&size=512'),
+('Beatriz Andrade Souza', 'beatriz.souza@etecalbertoferes.com', 'https://ui-avatars.com/api/?name=Beatriz+Andrade+Souza&background=9333ea&color=fff&size=512'),
+('João Pedro Oliveira', 'joao.oliveira@etecalbertoferes.com', 'https://ui-avatars.com/api/?name=Joao+Pedro+Oliveira&background=f97316&color=fff&size=512');
 
--- ALUNOS_PROJETOS (participações)
+-- ALUNOS_PROJETOS
 INSERT INTO alunos_projetos (id_aluno, id_projeto, papel)
 VALUES
 (1, 1, 'Desenvolvedor Full Stack'),
@@ -1082,199 +1655,3 @@ VALUES
 (1, 5, 'Desenvolvedor Web'),
 (2, 5, 'Gerente de Conteúdo');
 ```
-
-## A camada ViewModel
-
-A camada ViewModel é responsável por gerenciar o estado da interface e a lógica de apresentação, atuando como intermediária entre a view e o model. Ela encapsula os dados necessários para a tela e fornece métodos para manipular esses dados, mantendo a view desacoplada da lógica de negócios.
-
-As principais características são:
-* Cria um estado reativo para os dados da tela;
-* Gerencia a lógica de apresentação sem conhecer a view específica;
-* Fornece métodos para interagir com o model;
-* Facilita o teste unitário e a manutenção do código;
-* Permite a reutilização de lógica entre diferentes views.
-
-### Criando ViewModels
-
-1. Crie a classe `projetos/viewmode/projetos_viewmodel.dart`
-2. Implemente a lógica do ViewModel seguindo o padrão Riverpod:
-
-```dart
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
-import 'package:tcc_flutter_app/src/features/projetos/model/repositories/projetos_repository_impl.dart';
-
-part 'projetos_viewmodel.g.dart';
-
-@Riverpod(keepAlive: true)
-FutureOr<List<ProjetoModel>> projetos(Ref ref) {
-  return ref.watch(projetosRepositoryProvider).findAll();
-}
-```
-
-## A camada view (UI/Interface)
-
-A camada view é responsável por toda a interface do usuário, incluindo layouts, componentes e a experiência visual dos alunos e coordenadores.
-
-Ela utiliza tecnologias como Flutter para criar interfaces responsivas e intuitivas que funcionam tanto em dispositivos móveis quanto em web, garantindo uma experiência consistente para todos os usuários do sistema.
-
-### Criando as Views
-
-1. Crie o arquivo `view/projetos_view.dart`
-2. Crie o arquivo `view/widgets/projeto_widget.dart`;
-3. Crie o arquivo `view/widgets/lista_projetos_widget.dart`;
-
-#### Implemente a UI usando Flutter e Riverpod para consumir o ViewModel
-
-1. Implemente o widget `ProjetoWidget` que exibe os detalhes de um projeto;
-```dart
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
-import 'package:go_router/go_router.dart';
-
-class ProjetoWidget extends ConsumerWidget {
-  const ProjetoWidget({super.key, required this.projeto});
-
-  final ProjetoModel projeto;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Card.filled(
-      margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            height: 200,
-            width: double.infinity,
-            child: Image.network(
-              projeto.urlImagem,
-              fit: BoxFit.cover,
-              cacheHeight: 200,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-
-                final total = loadingProgress.expectedTotalBytes;
-                final loaded = loadingProgress.cumulativeBytesLoaded;
-
-                return Center(
-                  child: CircularProgressIndicator(
-                    value: total != null ? loaded / total : null,
-                  ),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-            child: Text(
-              projeto.titulo,
-              style: Theme.of(context).textTheme.titleLarge,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
-            child: Text(
-              projeto.descricao,
-              style: Theme.of(context).textTheme.bodyMedium,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-
-          Align(
-            alignment: Alignment.centerRight,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 16.0, bottom: 16),
-              child: FilledButton(
-                onPressed: () {
-                  context.go('/projeto', extra: projeto);
-                },
-                child: const Text('Ver projeto'),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-```
-
-2. Implemente o widget `ListaProjetosWidget` que lista todos os projetos;
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
-import 'package:tcc_flutter_app/src/features/projetos/view/widgets/projeto_widget.dart';
-
-class ListaProjetosWidget extends StatelessWidget {
-  const ListaProjetosWidget({super.key, required this.projetos});
-
-  final List<ProjetoModel> projetos;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: projetos.length,
-      itemBuilder: (context, index) {
-        final projeto = projetos[index];
-        return ProjetoWidget(projeto: projeto);
-      },
-    );
-  }
-}
-```
-
-3. Implemente o widget `ProjetosView` que usa o `ListaProjetosWidget` e o `ProjetoWidget`
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tcc_flutter_app/src/features/projetos/viewmodel/projetos_viewmodel.dart';
-import 'package:tcc_flutter_app/src/features/projetos/view/widgets/lista_projetos_widget.dart';
-
-class ProjetosView extends ConsumerWidget {
-  const ProjetosView({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final projetos = ref.watch(projetosProvider);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Projetos'),
-      ),
-      body: projetos.when(
-        data: (data) => ListaProjetosWidget(projetos: data),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stackTrace) => const Center(child: Text('Erro ao carregar projetos.')),
-      ),
-    );
-  }
-}
-```
-
-5. Adicione a rota para `/projeto` no router.dart para navegar para a tela de detalhe do projeto.
-
-```dart
-StatefulShellBranch(
-  routes: [
-    GoRoute(
-      path: '/projetos',
-      builder: (context, state) => ProjetosView(),
-    ),
-  ],
-),
-```
-
-## Teste o aplicativo
-
-![](assets/images/projetos.jpg)
-
-

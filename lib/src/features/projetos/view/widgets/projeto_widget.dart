@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
 
 class ProjetoWidget extends ConsumerWidget {
@@ -26,6 +27,11 @@ class ProjetoWidget extends ConsumerWidget {
                   projeto.urlImagem,
                   fit: BoxFit.cover,
                   cacheHeight: 200,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    child: Icon(Icons.broken_image,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
 
@@ -44,7 +50,7 @@ class ProjetoWidget extends ConsumerWidget {
                   bottom: 4,
                   right: 6,
                   child: Chip(
-                    label: Text(projeto.curso.nome!),
+                    label: Text(projeto.curso.nome ?? ''),
                     backgroundColor: Theme.of(
                       context,
                     ).colorScheme.primaryContainer,
@@ -77,8 +83,7 @@ class ProjetoWidget extends ConsumerWidget {
               padding: const EdgeInsets.only(right: 16.0, bottom: 16),
               child: FilledButton(
                 onPressed: () {
-                  //TODO: Implementar navegação para tela de projetos.
-                  // context.go('/projeto', extra: projeto);
+                  context.go('/projetos/detalhe', extra: projeto);
                 },
                 child: const Text('Ver projeto'),
               ),

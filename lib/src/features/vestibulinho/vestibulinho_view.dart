@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:tcc_flutter_app/src/features/vestibulinho/viewmodel/curso_vestibulinho_viewmodel.dart';
 import 'package:tcc_flutter_app/src/features/vestibulinho/widgets/curso_vestibulinho_widget.dart';
 
@@ -15,18 +16,27 @@ class VestibulinhoView extends ConsumerWidget {
         child: Column(
           children: [
             Image.network(
-              'https://bkpsitecpsnew.blob.core.windows.net/uploadsitecps/sites/48/2025/08/1.png',
-              // cacheHeight: 200,
-              loadingBuilder: (context, child, loadingProgress) {
-                if (loadingProgress == null) return child;
-                int total = loadingProgress.expectedTotalBytes ?? 0;
-                int loaded = loadingProgress.cumulativeBytesLoaded;
-                return Center(
-                  child: LinearProgressIndicator(
-                    value: total != 0 ? loaded / total : null,
+              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSyJM_JeVrhRCXONOdo4yDz_jLkkUK13JY_wbLmxtoVeA&s=10',
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) => Container(
+                height: 150,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.school,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant),
+                      const SizedBox(height: 8),
+                      Text('Vestibulinho',
+                          style: Theme.of(context).textTheme.titleMedium),
+                    ],
                   ),
-                );
-              },
+                ),
+              ),
             ),
             cursosVestibulinho.when(
               data: (cursos) => Column(
@@ -46,7 +56,12 @@ class VestibulinhoView extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
+        onPressed: () async {
+          final uri = Uri.parse('https://vestibulinho.etec.sp.gov.br/home/');
+          if (await canLaunchUrl(uri)) {
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          }
+        },
         label: const Text('INSCREVA-SE'),
         icon: const Icon(Icons.link),
       ),

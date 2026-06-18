@@ -14,9 +14,10 @@ class ListaCursosWidget extends StatelessWidget {
       itemBuilder: (context, index) {
         final curso = cursos[index];
         return ListTile(
-          leading: CircleAvatar(child: Text(curso.nome!.substring(0, 1))),
-          title: Text(curso.nome!),
-          subtitle: Text(curso.descricao!),
+          leading: CircleAvatar(
+              child: Text((curso.nome ?? '?').substring(0, 1))),
+          title: Text(curso.nome ?? ''),
+          subtitle: Text(curso.descricao ?? ''),
           onTap: () => context.go('/cursos/curso', extra: curso),
         );
       },

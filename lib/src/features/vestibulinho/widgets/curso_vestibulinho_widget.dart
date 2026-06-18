@@ -23,10 +23,14 @@ class CursoVestibulinhoWidget extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16.0),
                     child: Image.network(
-                      curso.urlImagem!,
+                      curso.urlImagem ?? '',
                       fit: BoxFit.cover,
-                      // width: 150,
-                      // height: 150,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Container(
+                            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                            child: Icon(Icons.broken_image,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant),
+                          ),
                     ),
                   ),
                 ),
@@ -46,7 +50,7 @@ class CursoVestibulinhoWidget extends StatelessWidget {
                     vertical: 4.0,
                   ),
                   child: Text(
-                    curso.nome!,
+                    curso.nome ?? 'Curso',
                     style: Theme.of(context).textTheme.titleLarge,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -58,7 +62,7 @@ class CursoVestibulinhoWidget extends StatelessWidget {
                     vertical: 4.0,
                   ),
                   child: Text(
-                    curso.descricao!,
+                    curso.descricao ?? '',
                     style: Theme.of(context).textTheme.bodyMedium,
                     maxLines: 4,
                     overflow: TextOverflow.ellipsis,

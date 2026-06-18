@@ -9,7 +9,6 @@ class ProjetosView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final projetos = ref.watch(projetosProvider);
-    print(projetos);
     return Scaffold(
       appBar: AppBar(
         // backgroundColor: Colors.grey.shade200,

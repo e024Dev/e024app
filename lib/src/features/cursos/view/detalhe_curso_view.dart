@@ -17,9 +17,13 @@ class DetalheCursoView extends StatelessWidget {
             centerTitle: true,
             // title: Text(curso.nome!, style: TextStyle(color: Colors.white),),
             background: Image.network(
-              curso.urlImagem!,
+              curso.urlImagem ?? '',
               fit: BoxFit.cover,
-              cacheHeight: 250,
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: Icon(Icons.school,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ),
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
                 final total = loadingProgress.expectedTotalBytes;
@@ -38,15 +42,18 @@ class DetalheCursoView extends StatelessWidget {
           delegate: SliverChildListDelegate([
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: Text(curso.nome!, style: Theme.of(context).textTheme.titleLarge),
+              child: Text(curso.nome ?? '',
+                  style: Theme.of(context).textTheme.titleLarge),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: Text(curso.descricao!, style: Theme.of(context).textTheme.bodyLarge),
+              child: Text(curso.descricao ?? '',
+                  style: Theme.of(context).textTheme.bodyLarge),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: Text(curso.ementaResumida!, style: Theme.of(context).textTheme.bodyLarge),
+              child: Text(curso.ementaResumida ?? '',
+                  style: Theme.of(context).textTheme.bodyLarge),
             ),
           ]),
         ),

@@ -5,6 +5,8 @@ import 'package:tcc_flutter_app/src/features/cursos/view/cursos_view.dart';
 import 'package:tcc_flutter_app/src/features/cursos/view/detalhe_curso_view.dart';
 import 'package:tcc_flutter_app/src/features/home/view/home_view.dart';
 import 'package:tcc_flutter_app/src/features/mapa/google_maps_view.dart';
+import 'package:tcc_flutter_app/src/features/projetos/model/prodeto_model.dart';
+import 'package:tcc_flutter_app/src/features/projetos/view/projeto_detalhe_view.dart';
 import 'package:tcc_flutter_app/src/features/projetos/view/projetos_view.dart';
 import 'package:tcc_flutter_app/src/features/vestibulinho/vestibulinho_view.dart';
 
@@ -25,6 +27,15 @@ final router = GoRouter(
             GoRoute(
               path: '/projetos',
               builder: (context, state) => ProjetosView(),
+              routes: [
+                GoRoute(
+                  path: '/detalhe',
+                  builder: (context, state) {
+                    final projeto = state.extra as ProjetoModel;
+                    return ProjetoDetalheView(projeto: projeto);
+                  },
+                ),
+              ],
             ),
           ],
         ),
